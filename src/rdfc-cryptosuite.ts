@@ -1,7 +1,7 @@
 import { sha256 } from '@noble/hashes/sha256';
 import rdfc from 'rdf-canonize';
 import { base58btc } from 'multiformats/bases/base58';
-import { CryptoSuite } from './cryptosuite.js';
+import { Cryptosuite } from './cryptosuite.js';
 import { Btc1KeyManagerError } from './error.js';
 import Multikey from './multikey.js';
 import { IDataIntegrityProof, ProofDocument, ProofOptions, SignatureBytes, VerifiedProof } from './types.js';
@@ -18,7 +18,7 @@ import { IDataIntegrityProof, ProofDocument, ProofOptions, SignatureBytes, Verif
  * @type {SchnorrSecp256k1Rdfc2025}
  */
 
-export default class SchnorrSecp256k1Rdfc2025 implements CryptoSuite {
+export default class SchnorrSecp256k1Rdfc2025 implements Cryptosuite {
   type = 'DataIntegrityProof';
   cryptosuite = 'schnorr-secp256k1-rdfc-2025';
   multikey: Multikey;

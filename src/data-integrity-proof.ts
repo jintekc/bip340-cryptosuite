@@ -48,7 +48,7 @@ export default class DataIntegrityProof {
     // domain,
     challenge
   }: VerifyProof) {
-    const securedDocument = JSON.parse(new TextDecoder().decode(documentBytes));
+    const securedDocument = JSON.parse(Buffer.from(documentBytes).toString());
 
     if (typeof securedDocument !== 'object' || typeof securedDocument.proof !== 'object') {
       throw new Error('PARSING_ERROR');

@@ -17,9 +17,7 @@ const diProof = new DataIntegrityProof(cryptosuite);
 const unsecuredDocument = {
   '@context' : [
     'https://www.w3.org/ns/credentials/v2',
-    'https://www.w3.org/ns/credentials/examples/v2'
-  ],
-  'issuer'            : 'did:btc1:k1q2ddta4gt5n7u6d3xwhdyua57t6awrk55ut82qvurfm0qnrxx5nw7vnsy65',
+    'https://www.w3.org/ns/credentials/examples/v2'],
   'id'                : 'http://university.example/credentials/58473',
   'type'              : ['VerifiableCredential', 'ExampleAlumniCredential'],
   'validFrom'         : '2020-01-01T00:00:00Z',
@@ -30,6 +28,7 @@ const unsecuredDocument = {
       'name' : 'Example University'
     }
   },
+  'issuer' : 'did:btc1:k1q2ddta4gt5n7u6d3xwhdyua57t6awrk55ut82qvurfm0qnrxx5nw7vnsy65'
 };
 // Options are the "proof section"
 // Proof Options => all but proof value
@@ -44,7 +43,7 @@ const proofOptions = {
 const securedDocument = diProof.addProof(unsecuredDocument, proofOptions);
 console.log('securedDocument', securedDocument);
 const verifiedProof = diProof.verifyProof({
-  documentBytes        : new TextEncoder().encode(JSON.stringify(securedDocument)),
+  documentBytes        : Buffer.from(JSON.stringify(securedDocument)),
   expectedProofPurpose : 'attestationMethod',
 });
 console.log('verifiedProof', verifiedProof);

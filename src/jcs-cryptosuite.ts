@@ -1,7 +1,7 @@
 import { sha256 } from '@noble/hashes/sha256';
 import * as jcs from '@web5/crypto';
 import { base58btc } from 'multiformats/bases/base58';
-import { CryptoSuite } from './cryptosuite.js';
+import { Cryptosuite } from './cryptosuite.js';
 import { Btc1KeyManagerError } from './error.js';
 import Multikey from './multikey.js';
 import { IDataIntegrityProof, ProofDocument, ProofOptions, SignatureBytes, VerifiedProof } from './types.js';
@@ -16,7 +16,7 @@ import { IDataIntegrityProof, ProofDocument, ProofOptions, SignatureBytes, Verif
  * @type {JcsCryptosuite}
  */
 
-export default class JcsCryptosuite implements CryptoSuite {
+export default class JcsCryptosuite implements Cryptosuite {
   type = 'DataIntegrityProof';
   cryptosuite = 'schnorr-secp256k1-jcs-2025';
   multikey: Multikey;
@@ -79,9 +79,8 @@ export default class JcsCryptosuite implements CryptoSuite {
   }
 
   proofVerification(hashData: string, proofBytes: Uint8Array, options: ProofOptions): boolean {
-    const proofVm = options['verificationMethod'];
-    if (proofVm !== this.multikey.fullId()) {
-      throw new Btc1KeyManagerError('Multikey does not match expected verificationMethod: ' + proofVm);
+    if (options.verificationMethod !== this.multikey.fullId()) {
+      throw new Btc1KeyManagerError('Multikey does not match expected verificationMethod: ' + options.verificationMethod);
     }
     return this.multikey.verify(hashData, proofBytes);
   }
