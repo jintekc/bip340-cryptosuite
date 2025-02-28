@@ -1,7 +1,7 @@
 import Multikey from './multikey.js';
 import { IDataIntegrityProof, ProofDocument, ProofOptions, SignatureBytes, VerifiedProof } from './types.js';
 
-export interface CryptoSuite {
+export interface Cryptosuite {
   type: string; // 'IDataIntegrityProof'
   cryptosuite: string; // 'schnorr-secp256k1-jcs-2025' | 'schnorr-secp256k1-rdfc-2025';
   multikey: Multikey;

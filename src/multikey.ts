@@ -6,13 +6,12 @@ import { base58btc } from 'multiformats/bases/base58';
 import { Btc1KeyManagerError } from './error.js';
 import {
   Hex,
-  SchnorrKeyPair,
   MultikeyParams,
   PrivateKeyBytes,
   PublicKeyBytes,
-  SchnorrSecp256k1Multikey,
   PublicKeyMultibase,
-  MultikeyPrefix,
+  SchnorrKeyPair,
+  SchnorrSecp256k1Multikey
 } from './types.js';
 const SECP256K1_XONLY_PREFIX: Uint8Array = new Uint8Array([0xe1, 0x4a]);
 
