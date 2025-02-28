@@ -1,13 +1,13 @@
 import { Hex } from '@noble/secp256k1';
 import { DidVerificationMethod } from '@web5/dids';
 import { PrivateKeyBytes, PublicKeyBytes, SignatureBytes, PublicKeyMultibase } from '../../types/shared.js';
-import Bip340Multikey from './multikey.js';
+import { Bip340Multikey } from './multikey.js';
 
 /**
  * Interface representing a BIP-340 Multikey.
  * @interface IBip340Multikey
  */
-interface IBip340Multikey {
+export interface IBip340Multikey {
   /** @type {string} The unique identifier of the multikey */
   id: string;
 
@@ -71,5 +71,3 @@ interface IBip340Multikey {
    */
   fromVerificationMethod(verificationMethod: DidVerificationMethod): Bip340Multikey;
 }
-
-export default IBip340Multikey;

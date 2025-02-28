@@ -1,3 +1,3 @@
-interface IBtc1KeyManager {}
+export interface IBtc1KeyManager {}
 
-export default class Btc1KeyManager implements IBtc1KeyManager {}
+export class Btc1KeyManager implements IBtc1KeyManager {}

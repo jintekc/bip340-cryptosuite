@@ -7,7 +7,7 @@ import {
   VerificationResult
 } from '../../types/di-proof.js';
 import { HashHex, SignatureBytes } from '../../types/shared.js';
-import Bip340Multikey from '../multikey/multikey.js';
+import { Bip340Multikey } from '../multikey/multikey.js';
 
 /**
  * Interface representing a BIP-340 Cryptosuite.
@@ -15,7 +15,7 @@ import Bip340Multikey from '../multikey/multikey.js';
  * @interface ICryptosuite
  * @type {ICryptosuite}
  */
-interface ICryptosuite {
+export interface ICryptosuite {
   /** @type {DataIntegrityProofType} The type of proof produced by the cryptosuite */
   type: DataIntegrityProofType;
 
@@ -90,5 +90,3 @@ interface ICryptosuite {
    */
   proofVerification({ hashData, proofBytes, options }: VerificationParams): boolean;
 }
-
-export default ICryptosuite;

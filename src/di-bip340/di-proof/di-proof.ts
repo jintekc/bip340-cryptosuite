@@ -1,6 +1,6 @@
 import { Bip340Cryptosuite } from '../../types/cryptosuite.js';
 import { AddProofParams, SecureDocument, VerificationResult, VerifyProofParams } from '../../types/di-proof.js';
-import IDataIntegrityProof from './interface.js';
+import { IDataIntegrityProof } from './interface.js';
 
 /**
  * Implements section
@@ -11,7 +11,7 @@ import IDataIntegrityProof from './interface.js';
  * @type {DataIntegrityProof}
  * @implements {IDataIntegrityProof}
  */
-export default class DataIntegrityProof implements IDataIntegrityProof {
+export class DataIntegrityProof implements IDataIntegrityProof {
   /** @type {Bip340Cryptosuite} The cryptosuite to use for proof generation and verification. */
   public cryptosuite: Bip340Cryptosuite;
 

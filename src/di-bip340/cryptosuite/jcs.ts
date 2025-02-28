@@ -18,8 +18,8 @@ import {
 } from '../../types/di-proof.js';
 import { HashHex, SignatureBytes } from '../../types/shared.js';
 import { Bip340CryptosuiteError } from '../../utils/error.js';
-import Bip340Multikey from '../multikey/multikey.js';
-import ICryptosuite from './interface.js';
+import { Bip340Multikey } from '../multikey/multikey.js';
+import { ICryptosuite } from './interface.js';
 
 /**
  * Implements section
@@ -29,7 +29,7 @@ import ICryptosuite from './interface.js';
  * @class Bip340CryptosuiteJcs
  * @type {Bip340CryptosuiteJcs}
  */
-class Bip340CryptosuiteJcs implements ICryptosuite {
+export class Bip340CryptosuiteJcs implements ICryptosuite {
   /** @type {DataIntegrityProofType} The type of proof produced by the Cryptosuite */
   public type: DataIntegrityProofType = 'DataIntegrityProof';
 
@@ -176,5 +176,3 @@ class Bip340CryptosuiteJcs implements ICryptosuite {
     return this.multikey.verify(hashData, proofBytes);
   }
 }
-
-export default Bip340CryptosuiteJcs;
