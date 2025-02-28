@@ -44,7 +44,7 @@ class Bip340Multikey implements IBip340Multikey {
   constructor({ id, controller, privateKey, publicKey }: Bip340MultikeyParams) {
     // If there is no public or private key, throw an error
     if (!publicKey && !privateKey) {
-      throw new Btc1KeyManagerError('Must pass one of: publicKey, privateKey or both');
+      throw new Btc1KeyManagerError('Must pass publicKey, privateKey or both');
     }
 
     // Set the id and controller
