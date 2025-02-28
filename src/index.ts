@@ -1,4 +1,13 @@
-export * from './di-bip340/index.js';
+export * from './di-bip340/cryptosuite/jcs.js';
+export * from './di-bip340/cryptosuite/rdfc.js';
+export * from './di-bip340/cryptosuite/interface.js';
+
+export * from './di-bip340/di-proof/di-proof.js';
+export * from './di-bip340/di-proof/interface.js';
+
+export * from './di-bip340/multikey/multikey.js';
+export * from './di-bip340/multikey/interface.js';
+export * from './di-bip340/multikey/utils.js';
 
 export * from './types/cryptosuite.js';
 export * from './types/di-proof.js';
