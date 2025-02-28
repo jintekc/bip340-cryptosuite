@@ -1,5 +1,5 @@
-import Bip340CryptosuiteJcs from '../di-bip340/cryptosuite/jcs.js';
-import Bip340CryptosuiteRdfc from '../di-bip340/cryptosuite/rdfc.js';
+import { Bip340CryptosuiteJcs } from '../di-bip340/cryptosuite/jcs.js';
+import { Bip340CryptosuiteRdfc } from '../di-bip340/cryptosuite/rdfc.js';
 import { InsecureDocument, ProofOptions, SecureDocument } from './di-proof.js';
 import { Bip340MultikeyParams } from './multikey.js';
 

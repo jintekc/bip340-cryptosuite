@@ -3,7 +3,7 @@ import { utils } from '@noble/secp256k1';
 import { base58btc } from 'multiformats/bases/base58';
 import { Btc1KeyManagerError } from '../../utils/error.js';
 import { SchnorrKeyPair, PublicKeyMultibase, PublicKeyBytes } from '../../types/shared.js';
-import Bip340Multikey from './multikey.js';
+import { Bip340Multikey } from './multikey.js';
 import { Bip340MultikeyParams } from '../../types/multikey.js';
 
 /* Fixed header bytes per the spec for a BIP-340 Multikey */
@@ -16,7 +16,7 @@ export const SECP256K1_XONLY_PREFIX: Uint8Array = new Uint8Array([0xe1, 0x4a]);
  * @class Bip340MultikeyUtils
  * @type {Bip340MultikeyUtils}
  */
-class Bip340MultikeyUtils {
+export class Bip340MultikeyUtils {
   protected multikey?: Bip340Multikey;
 
   constructor(params?: Bip340MultikeyParams) {
@@ -75,5 +75,3 @@ class Bip340MultikeyUtils {
     return base58btc.encode(multikeyBytes);
   }
 }
-
-export default Bip340MultikeyUtils;

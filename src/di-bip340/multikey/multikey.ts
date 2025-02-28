@@ -5,8 +5,8 @@ import { base58btc } from 'multiformats/bases/base58';
 import { Btc1KeyManagerError } from '../../utils/error.js';
 import { Hex } from '@noble/secp256k1';
 import { PrivateKeyBytes, PublicKeyBytes, SignatureBytes, PublicKeyMultibase } from '../../types/shared.js';
-import IBip340Multikey from './interface.js';
-import Bip340MultikeyUtils, { SECP256K1_XONLY_PREFIX } from './utils.js';
+import { IBip340Multikey } from './interface.js';
+import { Bip340MultikeyUtils, SECP256K1_XONLY_PREFIX } from './utils.js';
 import { Bip340MultikeyParams } from '../../types/multikey.js';
 
 /**
@@ -18,7 +18,7 @@ import { Bip340MultikeyParams } from '../../types/multikey.js';
  * @type {Bip340Multikey}
  * @implements {Bip340Multikey}
  */
-class Bip340Multikey implements IBip340Multikey {
+export class Bip340Multikey implements IBip340Multikey {
   /** @type {string} The controller id for the full id */
   public id: string;
 
@@ -140,5 +140,3 @@ class Bip340Multikey implements IBip340Multikey {
     return new Bip340Multikey({ id, controller, publicKey });
   }
 }
-
-export default Bip340Multikey;

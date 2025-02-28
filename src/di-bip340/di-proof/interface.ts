@@ -12,7 +12,7 @@ import {
  * @interface IDataIntegrityProof
  * @type {IDataIntegrityProof}
  */
-interface IDataIntegrityProof {
+export interface IDataIntegrityProof {
   /** @type {Bip340Cryptosuite} Bip340CryptosuiteJcs or Bip340CryptosuiteRdfc class object  */
   cryptosuite: Bip340Cryptosuite;
 
@@ -37,5 +37,3 @@ interface IDataIntegrityProof {
    */
   verifyProof({ mediaType, document, expectedPurpose, expectedDomain, expectedChallenge }: VerifyProofParams): VerificationResult;
 }
-
-export default IDataIntegrityProof;
