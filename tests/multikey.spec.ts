@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import Bip340Multikey from '../src/di-bip340/multikey/multikey.js';
+import { Bip340Multikey } from '../src/di-bip340/multikey/multikey.js';
 import { Btc1KeyManagerError } from '../src/index.js';
 import ObjectUtils from '../src/utils/object-utils.js';
 
