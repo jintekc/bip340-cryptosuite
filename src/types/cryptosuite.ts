@@ -1,6 +1,6 @@
 import { CryptosuiteJcs } from '../../lib/jcs.js';
 import { CryptosuiteRdfc } from '../../lib/rdfc.js';
-import { Multikey } from '../di-bip340/index.js';
+import { Multikey } from '../di-bip340/multikey/index.js';
 import { DataIntegrityProofType, InsecureDocument, ProofOptions, SecureDocument } from './di-proof.js';
 
 /** Types */
@@ -32,7 +32,6 @@ export type GenerateHashParams = {
   canonicalDocument: string
 }
 export type CryptosuiteType = 'schnorr-secp256k1-jcs-2025' | 'schnorr-secp256k1-rdfc-2025';
-export type Cryptosuite = CryptosuiteJcs | CryptosuiteRdfc;
 
 /** Interfaces */
 export interface CryptosuiteParams {

@@ -1,5 +1,4 @@
-export * from '../lib/jcs.js';
-export * from '../lib/rdfc.js';
+export * from './di-bip340/cryptosuite/index.js';
 export * from './di-bip340/cryptosuite/interface.js';
 
 export * from './di-bip340/data-integrity-proof/index.js';

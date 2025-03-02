@@ -1,6 +1,6 @@
 {
   "name": "@did-btc1/key-manager",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "description": "Key manager for did-btc1 using Data Integrity BIP-340 Cryptosuite v0.1",
   "main": "./dist/cjs/index.js",
