@@ -14,7 +14,7 @@
     "outDir": "dist/esm"
   },
   "include": [
-    "src",
+    "src"
   ],
   "exclude": [
     "eslint.config.cjs",

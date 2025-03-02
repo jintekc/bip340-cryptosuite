@@ -26,6 +26,9 @@ importers:
       '@web5/dids':
         specifier: ^1.2.0
         version: 1.2.0
+      jsonld-document-loader:
+        specifier: ^2.3.0
+        version: 2.3.0
       jsonld-signatures:
         specifier: ^11.5.0
         version: 11.5.0(web-streams-polyfill@3.3.3)
@@ -1205,6 +1208,10 @@ packages:
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
+
+  jsonld-document-loader@2.3.0:
+    resolution: {integrity: sha512-u06N5O5sCewgXyxFnnRSm0w3o47ps834QjYzpOMc13Nq+AJQd/JGYrW/WZnz5D+8NEvnKXph7AFi6MA7ZJ8Q0Q==}
+    engines: {node: '>=18'}
 
   jsonld-signatures@11.5.0:
     resolution: {integrity: sha512-Kdto+e8uvY/5u3HYkmAbpy52bplWX9uqS8fmqdCv6oxnCFwCTM0hMt6r4rWqlhw5/aHoCHJIRxwYb4QKGC69Jw==}
@@ -2980,6 +2987,8 @@ snapshots:
   json-schema-traverse@0.4.1: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
+
+  jsonld-document-loader@2.3.0: {}
 
   jsonld-signatures@11.5.0(web-streams-polyfill@3.3.3):
     dependencies:
