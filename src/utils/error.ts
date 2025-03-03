@@ -16,3 +16,23 @@ export class CryptosuiteError extends Btc1KeyManagerError {
     super(message, type ?? 'CryptosuiteError', 'CryptosuiteError');
   }
 }
+
+export class KeyPairError extends Btc1KeyManagerError {
+  constructor(message: string, type?: string) {
+    super(message, type ?? 'KeyPairError', 'KeyPairError');
+  }
+}
+
+
+export class MultikeyError extends Btc1KeyManagerError {
+  constructor(message: string, type?: string) {
+    super(message, type ?? 'MultikeyError', 'MultikeyError');
+  }
+}
+
+
+export class DataIntegrityProofError extends Btc1KeyManagerError {
+  constructor(message: string, type?: string) {
+    super(message, type ?? 'DataIntegrityProofError', 'DataIntegrityProofError');
+  }
+}

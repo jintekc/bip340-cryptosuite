@@ -35,7 +35,7 @@ export class CryptosuiteRdfc implements ICryptosuite {
   public type: DataIntegrityProofType = 'DataIntegrityProof';
 
   /** @type {string} The name of the cryptosuite */
-  public cryptosuite: string = 'schnorr-secp256k1-rdfc-2025';
+  public cryptosuite: string = 'bip-340-rdfc-2025';
 
   /** @type {Multikey} The multikey used to sign and verify proofs */
   public multikey: Multikey;

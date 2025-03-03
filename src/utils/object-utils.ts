@@ -52,4 +52,22 @@ export default class ObjectUtils extends Object {
     return false;
   }
 
+  static delete({ obj, key }: { obj: Record<string, any>, key: string }): Record<string, any> {
+    if (typeof obj !== 'object' || obj === null) return obj; // Ensure it's an object
+
+    // If the key exists at the current level, delete it
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      delete obj[key];
+    }
+
+    // Recursively check nested objects and arrays
+    for (const key in obj) {
+      if (typeof obj[key] === 'object') {
+        obj[key] = this.delete({ obj: obj[key], key });
+      }
+    }
+
+    return obj;
+  }
+
 }

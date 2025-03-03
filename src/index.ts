@@ -1,3 +1,7 @@
+export * from './crypto/key-pair.js';
+export * from './crypto/private-key.js';
+export * from './crypto/public-key.js';
+
 export * from './di-bip340/cryptosuite/index.js';
 export * from './di-bip340/cryptosuite/interface.js';
 
@@ -10,7 +14,6 @@ export * from './di-bip340/multikey/utils.js';
 
 export * from './types/cryptosuite.js';
 export * from './types/di-proof.js';
-export * from './types/multikey.js';
 export * from './types/shared.js';
 
 export * from './utils/error.js';

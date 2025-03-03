@@ -15,7 +15,7 @@ const keys = new KeyPair(d);
 console.log('keys', keys);
 const controller = 'did:btc1:k1qvddh3hl7n5czluwhz9ry35tunkhtldhgr66zp907ewg4l7p6u786tz863a';
 const multikey = new Multikey({ id: '#initialKey', controller, privateKey: d });
-const cryptosuite = new Cryptosuite({ cryptosuite: 'schnorr-secp256k1-jcs-2025', multikey });
+const cryptosuite = new Cryptosuite({ cryptosuite: 'bip-340-jcs-2025', multikey });
 const proof = new DataIntegrityProof(cryptosuite);
 const keyManager = new Btc1KeyManager({ multikey, proof });
 console.log(keyManager);

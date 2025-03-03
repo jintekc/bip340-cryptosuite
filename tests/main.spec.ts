@@ -30,11 +30,11 @@ describe('Main Test', () => {
   const schnorrKeyHex = schnorrKey.toString(16).padStart(64, '0');
   const privateKey = new Uint8Array(schnorrKeyHex.match(/.{2}/g)!.map(byte => parseInt(byte, 16)));
   const multikey = new Multikey({ id, controller, privateKey });
-  const cryptosuite = new Cryptosuite({ cryptosuite: 'schnorr-secp256k1-jcs-2025', multikey });
+  const cryptosuite = new Cryptosuite({ cryptosuite: 'bip-340-jcs-2025', multikey });
   const diProof = new DataIntegrityProof(cryptosuite);
   const options: ProofOptions = {
     type               : 'DataIntegrityProof',
-    cryptosuite        : 'schnorr-secp256k1-jcs-2025',
+    cryptosuite        : 'bip-340-jcs-2025',
     verificationMethod : 'did:btc1:k1q2ddta4gt5n7u6d3xwhdyua57t6awrk55ut82qvurfm0qnrxx5nw7vnsy65#initialKey',
     proofPurpose       : 'attestationMethod'
   };

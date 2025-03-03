@@ -1,53 +1,65 @@
-import { Hex } from '@noble/secp256k1';
 import { DidVerificationMethod } from '@web5/dids';
-import { PrivateKeyBytes, PublicKeyBytes, SignatureBytes, PublicKeyMultibase } from '../../types/shared.js';
+import { PublicKey } from '../../crypto/public-key.js';
+import { HashBytes, PrivateKeyBytes, SignatureBytes } from '../../types/shared.js';
 import { Multikey } from './index.js';
+import { PrivateKey } from '../../crypto/private-key.js';
 
 /**
  * Interface representing a BIP-340 Multikey.
  * @interface IMultikey
  */
 export interface IMultikey {
-  /** @type {string} The unique identifier of the multikey */
-  id: string;
+  /**
+   * @readonly
+   * @type {string} The unique identifier of the multikey
+   */
+  readonly id: string;
 
-  /** @type {string} The controller of the multikey */
-  controller: string;
+  /**
+   * @readonly
+   * @type {string} The controller of the multikey
+   */
+  readonly controller: string;
 
-  /** @type {PrivateKeyBytes} The private key of the multikey (optional) */
-  privateKey?: PrivateKeyBytes;
+  /**
+   * @readonly
+   * @type {PublicKey} Lazily computes the public key bytes and returns a {@link PublicKey} instance
+   */
+  readonly publicKey?: PublicKey;
 
-  /** @type {PublicKeyBytes} The public key of the multikey (optional) */
-  publicKey?: PublicKeyBytes;
+  /**
+   * @readonly
+   * @type {PrivateKey} Getter returns a copy of the private key, ensuring immutability
+   */
+  readonly privateKey?: PrivateKey;
 
   /**
    * Produce signed data with a private key
-   * @param {string} data Data to be signed
+   * @param {HashBytes} data Data to be signed
    * @returns {SignatureBytes} Signature byte array
    * @throws {Btc1KeyManagerError} if no private key is provided
    */
-  sign(data: Hex): SignatureBytes;
+  sign(data: HashBytes): SignatureBytes;
 
   /**
    * Verify a signature
-   * @param {string} data Data for verification
+   * @param {HashBytes} data Data for verification
    * @param {SignatureBytes} signature Signature for verification
    * @returns {boolean} If the signature is valid against the public key
    */
-  verify(data: string, signature: SignatureBytes): boolean;
+  verify(data: HashBytes, signature: SignatureBytes): boolean;
 
   /**
-   * Encode the public key in SchnorrSecp256k1 Multikey Format
-   * @returns {PublicKeyMultibase} The encoded public key
+   * Encode the PublicKey to Multibase Format
+   * @returns {string} The multibase formatted public key
    */
-  encode(): PublicKeyMultibase;
+  encode(): string;
 
   /**
-   * Decode the public key in SchnorrSecp256k1 Multikey Format
-   * @param {PublicKeyMultibase} publicKeyMultibase The encoded public key
-   * @returns {PublicKeyBytes} The encoded public key
+   * Decode the public key from Multibase Format to a PublicKey
+   * @returns {PublicKey} A public key instance
    */
-  decode(publicKeyMultibase: PublicKeyMultibase): PublicKeyBytes;
+  decode(): PublicKey;
 
   /**
    * Get the full id of the multikey

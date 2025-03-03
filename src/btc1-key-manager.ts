@@ -1,13 +1,12 @@
+import { sha256 } from '@noble/hashes/sha256';
 import * as jcs from '@web5/crypto';
-
+import { base58btc } from 'multiformats/bases/base58';
+import { KeyPair } from './crypto/key-pair.js';
+import { PublicKey } from './crypto/public-key.js';
 import { Cryptosuite } from './di-bip340/cryptosuite/index.js';
 import { DataIntegrityProof } from './di-bip340/data-integrity-proof/index.js';
 import { Multikey } from './di-bip340/multikey/index.js';
 import { CryptosuiteType } from './types/cryptosuite.js';
-import { PrivateKeyBytes } from './types/shared.js';
-import { KeyPair } from './utils/keypair.js';
-import { sha256 } from '@noble/hashes/sha256';
-import { base58btc } from 'multiformats/bases/base58';
 
 interface Btc1KeyManagerParams {
     multikey: Multikey;
@@ -16,7 +15,8 @@ interface Btc1KeyManagerParams {
 
 interface InitializeKeyManager {
     fullId: string;
-    privateKey?: PrivateKeyBytes;
+    publicKey?: PublicKey;
+    keyPair?: KeyPair;
     type?: CryptosuiteType;
 }
 interface IBtc1KeyManager {
@@ -67,14 +67,14 @@ export class Btc1KeyManager implements IBtc1KeyManager {
     return base58btc.encode(hash);
   }
 
-  public static initialize({ fullId, type, privateKey }: InitializeKeyManager): Btc1KeyManager {
+  public static initialize({ fullId, type, keyPair, publicKey }: InitializeKeyManager): Btc1KeyManager {
     if(!fullId) {
       throw new Error('Must provide a fullId');
     }
-    type ??= 'schnorr-secp256k1-jcs-2025';
-    privateKey ??= new KeyPair().privateKey;
+    type ??= 'bip-340-jcs-2025';
+    keyPair ??= new KeyPair();
     const [id, controller] = fullId.split('#');
-    const multikey = new Multikey({ id: `#${id}`, controller, privateKey });
+    const multikey = new Multikey({ id: `#${id}`, controller, keyPair, publicKey });
     const cryptosuite = new Cryptosuite({ cryptosuite: type, multikey });
     const proof = new DataIntegrityProof(cryptosuite);
     return new Btc1KeyManager({ multikey, proof });
