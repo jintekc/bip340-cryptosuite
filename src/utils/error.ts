@@ -23,6 +23,17 @@ export class KeyPairError extends Btc1KeyManagerError {
   }
 }
 
+export class PrivateKeyError extends Btc1KeyManagerError {
+  constructor(message: string, type?: string) {
+    super(message, type ?? 'PrivateKeyError', 'PrivateKeyError');
+  }
+}
+
+export class PublicKeyError extends Btc1KeyManagerError {
+  constructor(message: string, type?: string) {
+    super(message, type ?? 'PublicKeyError', 'PublicKeyError');
+  }
+}
 
 export class MultikeyError extends Btc1KeyManagerError {
   constructor(message: string, type?: string) {
@@ -30,9 +41,8 @@ export class MultikeyError extends Btc1KeyManagerError {
   }
 }
 
-
-export class DataIntegrityProofError extends Btc1KeyManagerError {
+export class ProofError extends Btc1KeyManagerError {
   constructor(message: string, type?: string) {
-    super(message, type ?? 'DataIntegrityProofError', 'DataIntegrityProofError');
+    super(message, type ?? 'ProofError', 'ProofError');
   }
 }

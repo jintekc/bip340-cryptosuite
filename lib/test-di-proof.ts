@@ -1,11 +1,9 @@
-import { Multikey } from '../src/di-bip340/multikey/index.js';
+import { KeyPair } from '../src/crypto/key-pair.js';
+import { PrivateKey } from '../src/crypto/private-key.js';
 import { Cryptosuite } from '../src/di-bip340/cryptosuite/index.js';
 import { DataIntegrityProof } from '../src/di-bip340/data-integrity-proof/index.js';
+import { Multikey } from '../src/di-bip340/multikey/index.js';
 import { ProofOptions } from '../src/types/di-proof.js';
-import * as secp from '@noble/secp256k1';
-import { PrivateKey } from '../src/crypto/private-key.js';
-import { PublicKey } from '../src/crypto/public-key.js';
-import { KeyPair } from '../src/crypto/key-pair.js';
 
 // Unsecured document
 const unsecuredDocument = {
@@ -44,10 +42,11 @@ const controller = 'did:btc1:k1q2ddta4gt5n7u6d3xwhdyua57t6awrk55ut82qvurfm0qnrxx
 // console.log('publicKey', publicKey);
 
 const privateKeyBytes = new Uint8Array([
-  139, 106,  49, 176,  63,  12, 121,  46,
-  94, 115, 142, 201,  94,  75, 143, 216,
-  210,  68, 197, 137, 232,  63,  63, 178,
-  30, 220, 161, 210,  96, 218, 198, 158
+  170, 100, 192, 188,  14, 203, 120,
+  26, 227,  45, 159, 242, 142, 244,
+  37, 223, 230, 253, 252,  17, 147,
+  71, 235, 121,  13, 217, 140, 245,
+  75, 215,  23,  50
 ]);
 // const publicKeyBytes = new Uint8Array([
 //   3,  79,  96, 138,  82,   3,  54,  86,
@@ -57,32 +56,34 @@ const privateKeyBytes = new Uint8Array([
 //   42
 // ]);
 // const publicKey = new PublicKey(publicKeyBytes);
-const keyPair = new KeyPair(new PrivateKey(privateKeyBytes));
+const keyPair = new KeyPair({ privateKey: new PrivateKey(privateKeyBytes)});
 console.log('privateKey', keyPair.privateKey);
 console.log('keyPair', keyPair);
 
 // Create multikey
 const multikey = new Multikey({ id, controller, keyPair });
 console.log('multikey', multikey);
-
+console.log('multikey.encode()', multikey.encode());
 // Create cryptosuite
-const cryptosuite = new Cryptosuite({ cryptosuite: 'bip-340-jcs-2025', multikey });
+const cryptosuite = new Cryptosuite({ cryptosuite: 'bip340-jcs-2025', multikey });
 console.log('cryptosuite', cryptosuite);
-
+const message = Buffer.from('Hello BTC1!');
+const signature = multikey.sign(message);
+console.log('signature', signature);
 // Create data integrity proof
 const diProof = new DataIntegrityProof(cryptosuite);
-console.log('diProof', diProof);
+// console.log('diProof', diProof);
 
 // Set options
 const options: ProofOptions = {
   type               : 'DataIntegrityProof',
-  cryptosuite        : 'bip-340-jcs-2025',
+  cryptosuite        : 'bip340-jcs-2025',
   verificationMethod : 'did:btc1:k1q2ddta4gt5n7u6d3xwhdyua57t6awrk55ut82qvurfm0qnrxx5nw7vnsy65#initialKey',
   proofPurpose       : 'attestationMethod'
 };
 // Add proof
 const securedDocument = await diProof.addProof({ document: unsecuredDocument, options });
-console.log('securedDocument', securedDocument);
+// console.log('securedDocument', securedDocument);
 
 const expectedPurpose = 'attestationMethod';
 const mediaType = 'application/json';

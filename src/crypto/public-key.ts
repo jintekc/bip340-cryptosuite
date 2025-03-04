@@ -1,74 +1,129 @@
-import { getPublicKey, Hex } from '@noble/secp256k1';
+import { Hex } from '@noble/secp256k1';
+import * as tinysecp from 'tiny-secp256k1';
 import { MultikeyUtils } from '../di-bip340/multikey/utils.js';
-import { PublicKeyBytes } from '../types/shared.js';
-import { Btc1KeyManagerError } from '../utils/error.js';
-// import { sha256 } from '@noble/hashes/sha256';
-
+import { PrivateKeyBytes, PublicKeyBytes } from '../types/shared.js';
+import { PublicKeyError } from '../utils/error.js';
+import { IPublicKey } from './interface.js';
+import { PrivateKey } from './private-key.js';
 
 /**
- * Represents a secp256k1 public key and provides different formats (compressed, x-only, multibase)
+ * Encapsulates a secp256k1 public key.
+ * Provides get methods for different formats (compressed, x-only, multibase).
+ * Provides helpers methods for comparison and serialization.
  * @export
  * @class PublicKey
  * @type {PublicKey}
+ * @implements {IPublicKey}
  */
-export class PublicKey {
+export class PublicKey implements IPublicKey {
+  /** @type {PublicKeyBytes} The Uint8Array public key */
   private readonly _bytes: PublicKeyBytes;
 
-  constructor(publicKey: PublicKeyBytes) {
-    if (publicKey.length !== 33) {
-      throw new Btc1KeyManagerError('Invalid public key: Expected 33-byte compressed secp256k1 key');
+  /**
+   * Creates an instance of PublicKey.
+   * @constructor
+   * @param {PublicKeyBytes} bytes The public key byte array.
+   * @throws {PublicKeyError} if the bytes are not x-only or compressed with 0x02 prefix
+   */
+  constructor(bytes: PublicKeyBytes) {
+    const bytelength = bytes.length;
+    if(bytelength === 33 && bytes[0] === 3) {
+      throw new PublicKeyError(
+        'Invalid argument: "bytes" must be 32-byte x-only or 33-byte compressed with 0x02 prefix',
+        'PUBLIC_KEY_CONSTRUCTOR_ERROR'
+      );
     }
-    this._bytes = publicKey;
+    this._bytes = bytelength === 32 ? new Uint8Array([0x02, ...Array.from(bytes)]) : bytes;
   }
 
-  /**
-   * Get the 33-byte compressed public key (prefix + x-coordinate)
-   */
-  get compressed(): PublicKeyBytes {
+  /** @see IPublicKey.compressed */
+  get compressed(): Uint8Array {
     return new Uint8Array(this._bytes);
   }
 
-  /**
-   * Get the 32-byte x-only public key (for Schnorr signatures and Taproot)
-   */
+  /** @see IPublicKey.parity */
+  get prefix(): number {
+    const prefixb = this.compressed[0];
+    return prefixb;
+  }
+
+  /** @see IPublicKey.x */
   get x(): PublicKeyBytes {
-    return new Uint8Array(this.compressed.slice(1, 33));
+    return this.compressed.slice(1, 33);
   }
 
-  /**
-   * Get the 32-byte y-coordinate of the public key
-   */
+  /** @see IPublicKey.y */
   get y(): PublicKeyBytes {
-    return new Uint8Array(this.uncompressed.slice(33, 65));
+    return this.uncompressed.slice(33, 65);
   }
 
-  /**
-   * Get the full public key (prefix + x + y)
-   */
+  /** @see IPublicKey.uncompressed */
   get uncompressed(): PublicKeyBytes {
-    return new Uint8Array(getPublicKey(this.compressed, false));
+    return tinysecp.pointCompress(this.compressed, false) as PublicKeyBytes;
   }
 
-  /** Converts the public key to a Multibase string */
-  public multibase(): string {
-    return MultikeyUtils.encode(this.compressed);
+  /** @see IPublicKey.multibase */
+  get multibase(): string {
+    return this.encode();
   }
 
-  /**
-   * Returns the public key as a hex string
-   * @public
-   * @returns {Hex} The public key as a hex string
-   */
+  /** @see IPublicKey.encode */
+  /** @see MultikeyUtils.encode */
+  public encode(): string {
+    return MultikeyUtils.encode(this.x);
+  }
+
+  /** @see IPublicKey.decode */
+  /** @see MultikeyUtils.decode */
+  public decode(): PublicKey {
+    // Decode the multibase to public key bytes
+    const publicKeyBytes = MultikeyUtils.decode(this.multibase);
+    // Dump the bytes into a new array with the prefix
+    const publicKey = new Uint8Array([this.prefix, ...Array.from(publicKeyBytes)]);
+    // Return a new PublicKey instance
+    return new PublicKey(publicKey);
+  }
+
+  /** @see IPublicKey.hex */
   public hex(): Hex {
     return Buffer.from(this.compressed).toString('hex');
   }
 
-  /**
-   * Checks if this public key is equal to another public key
-   * @public
-   * @returns {boolean} True if the public keys are equal
-   */
+  /** @see IPublicKey.equals */
   public equals(other: PublicKey): boolean {
     return this.hex() === other.hex();
+  }
+
+  /**
+   * Static method generates a new PublicKey from random bytes.
+   * @static
+   * @returns {PublicKey} A new KeyPair object
+   */
+  public static generate(): PublicKey {
+    return new PublicKey(this.random());
+  }
+
+  /**
+   * Static method computes the corresponding public key for a given private key.
+   * @static
+   * @param {PrivateKeyBytes} bytes The private key bytes
+   * @returns {PublicKey} A new PublicKey object
+   */
+  public static fromPrivateKey(bytes: PrivateKeyBytes): PublicKey {
+    const privateKey = new PrivateKey(bytes);
+    return privateKey.toPublicKey();
+  }
+
+  /**
+   * Static method to generate random public key bytes.
+   * @static
+   * @returns {PublicKeyBytes} Uint8Array of 32 random bytes.
+   */
+  public static random(): PublicKeyBytes {
+    const publicKeyBytes = tinysecp.pointFromScalar(PrivateKey.random(), true);
+    if (!publicKeyBytes) {
+      throw new PublicKeyError('Failed to generate random public key', 'PUBLIC_KEY_GENERATION_FAILED');
+    }
+    return publicKeyBytes;
   }
 }

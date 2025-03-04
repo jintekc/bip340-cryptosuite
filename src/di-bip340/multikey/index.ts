@@ -5,26 +5,10 @@ import { base58btc } from 'multiformats/bases/base58';
 import { KeyPair } from '../../crypto/key-pair.js';
 import { PrivateKey } from '../../crypto/private-key.js';
 import { PublicKey } from '../../crypto/public-key.js';
-import { HashBytes, PrivateKeyBytes, PublicKeyBytes, SignatureBytes } from '../../types/shared.js';
-import { Btc1KeyManagerError } from '../../utils/error.js';
-import { IMultikey } from './interface.js';
-import { MultikeyUtils, SECP256K1_XONLY_PREFIX } from './utils.js';
-
-interface DidParams {
-  id: string;
-  controller: string;
-}
-
-interface FromPrivateKey extends DidParams {
-  privateKey: PrivateKeyBytes
-}
-interface FromPublicKey extends DidParams {
-  publicKey: PublicKeyBytes
-}
-export interface MultikeyParams extends DidParams {
-  keyPair?: KeyPair;
-  publicKey?: PublicKey;
-}
+import { HashBytes, SignatureBytes } from '../../types/shared.js';
+import { MultikeyError } from '../../utils/error.js';
+import { FromPrivateKey, FromPublicKey, IMultikey, MultikeyParams } from './interface.js';
+import { SECP256K1_XONLY_PREFIX } from './utils.js';
 
 /**
  * Implements section
@@ -36,6 +20,9 @@ export interface MultikeyParams extends DidParams {
  * @implements {Multikey}
  */
 export class Multikey implements IMultikey {
+  /** @type {string} The verification metod type */
+  public static readonly type: string = 'Multikey';
+
   /** @type {string} The id references which key to use for various operations in the DID Document */
   public readonly id: string;
 
@@ -44,10 +31,7 @@ export class Multikey implements IMultikey {
 
   /** @type {PrivateKeyBytes} The private key bytes for the multikey (optional) */
   // private readonly _privateKey?: PrivateKeyBytes;
-  private readonly _keyPair?: KeyPair;
-
-  /** @type {PublicKey} The private key bytes for the multikey */
-  private _publicKey?: PublicKey;
+  private readonly _keyPair: KeyPair;
 
   /**
    * Creates an instance of Multikey.
@@ -58,140 +42,136 @@ export class Multikey implements IMultikey {
    * @param {KeyPair} params.keypair The keypair of the multikey (optional, required if no publicKey)
    * @param {PublicKeyBytes} params.keypair.publicKey The public key of the multikey (optional, required if no privateKey)
    * @param {PrivateKeyBytes} params.keypair.privateKey The private key of the multikey (optional)
-   * @throws {Btc1KeyManagerError} if neither a publicKey nor a privateKey is provided
+   * @throws {MultikeyError} if neither a publicKey nor a privateKey is provided
    */
-  constructor({ id, controller, keyPair, publicKey }: MultikeyParams) {
-    // If there is no public or private key, throw an error
-    if (!keyPair && !publicKey) {
-      throw new Btc1KeyManagerError('Must pass keyPair, publicKey or both');
+  constructor({ id, controller, keyPair }: MultikeyParams) {
+    // If no keypair passed, throw an error
+    if (!keyPair) {
+      throw new MultikeyError('Argument missing: "keyPair" required', 'MULTIKEY_CONSTRUCTOR_ERROR');
+    }
+
+    // If the keypair does not have a public key, throw an error
+    if(!keyPair.publicKey) {
+      throw new MultikeyError('Argument missing: "keyPair" must contain a "publicKey"', 'MULTIKEY_CONSTRUCTOR_ERROR');
     }
 
     // Set the class variables
     this.id = id;
     this.controller = controller;
     this._keyPair = keyPair;
-
-    // Do a gut check on ketPair.publicKey and publicKey if both are passed
-    if((keyPair && publicKey) && !keyPair.publicKey.equals(publicKey)) {
-      throw new Btc1KeyManagerError('Mismatching keyPair.publicKey and publicKey', 'PUBLIC_KEY_MISMATCH');
-    }
-
-    // Set the public key
-    this._publicKey = keyPair ? keyPair.publicKey : publicKey;
   }
 
-  /** @see IMultikey.privateKey */
-  get privateKey(): PrivateKey {
-    if(!this._keyPair) {
-      throw new Btc1KeyManagerError('No private key provided', 'PRIVATE_KEY_ERROR');
-    }
-    return this._keyPair?.privateKey;
+  /** @see IMultikey.keyPair */
+  get keyPair(): KeyPair {
+    // Return a copy of the keypair
+    const keyPair = this._keyPair;
+    return keyPair;
   }
 
   /** @see IMultikey.publicKey */
   get publicKey(): PublicKey {
-    if (!this._publicKey && !this.privateKey) {
-      throw new Btc1KeyManagerError('No public key provided and no private key available', 'PUBLIC_KEY_ERROR');
-    }
+    // Create and return a copy of the keyPair.publicKey
+    const publicKey = this.keyPair.publicKey;
+    return publicKey;
+  }
 
-    if (!this.privateKey || !this._publicKey) {
-      throw new Btc1KeyManagerError('No public key provided and no private key available', 'PUBLIC_KEY_ERROR');
+  /** @see IMultikey.privateKey */
+  get privateKey(): PrivateKey {
+    // Create and return a copy of the keyPair.privateKey
+    const privateKey = this.keyPair.privateKey;
+    // If there is no private key, throw an error
+    if(!this.isSigner) {
+      throw new MultikeyError('Cannot get: no privateKey', 'MULTIKEY_PRIVATE_KEY_ERROR');
     }
-    return this._publicKey ? new PublicKey(this._publicKey.compressed) : this.privateKey.toPublicKey();
+    return privateKey;
   }
 
   /** @see IMultikey.sign */
-  public sign(hashb: HashBytes): SignatureBytes {
+  public sign(message: string): SignatureBytes {
     // If there is no private key, throw an error
-    if (!this.privateKey) {
-      throw new Btc1KeyManagerError('Signing error: Private key is required to sign');
+    if (!this.isSigner) {
+      throw new MultikeyError('Cannot sign: no privateKey', 'MULTIKEY_SIGN_ERROR');
     }
     // Sign the hashb and return it
-    return schnorr.sign(hashb, this.privateKey.compressed, randomBytes(32));
+    return schnorr.sign(Buffer.from(message), this.privateKey.raw, randomBytes(32));
   }
 
   /** @see IMultikey.verify */
-  public verify(message: HashBytes, signature: SignatureBytes): boolean {
+  public verify(signature: SignatureBytes, message: string): boolean {
     // Verify the signature and return the result
     return schnorr.verify(signature, message, this.publicKey.x);
   }
 
-  /** @see IMultikey.encode */
-  public encode(): string {
-    // Encode the public key and return it
-    return this.publicKey.multibase();
-  }
-
-  /** @see IMultikey.decode */
-  public decode(): PublicKey {
-    // Decode the public key and return it
-    return MultikeyUtils.decode(this.publicKey.multibase());
-  }
-
   /** @see IMultikey.fullId */
   public fullId(): string {
-    // If the id starts with a #, return concat of controller and id no #
-    // Else, return the id
+    // If the id starts with "#", return concat(controller, id); else return id
     return this.id.startsWith('#') ? `${this.controller}${this.id}` : this.id;
   }
 
   /** @see IMultikey.toVerificationMethod */
   public toVerificationMethod(): DidVerificationMethod {
-    // Return the verification method
+    // Construct and return the verification method
     return {
       id                 : this.id,
-      type               : 'Multikey',
+      type               : Multikey.type,
       controller         : this.controller,
-      publicKeyMultibase : this.encode()
+      publicKeyMultibase : this.publicKey.multibase
     };
   }
 
   /** @see IMultikey.fromVerificationMethod */
   public fromVerificationMethod(verificationMethod: DidVerificationMethod): Multikey {
+    const VM_ERROR = 'MULTIKEY_VERIFICATION_METHOD_ERROR';
+
     // Destructure the verification method
     const { id, type, controller, publicKeyMultibase } = verificationMethod;
 
     // Check if the required field id is missing
     if (!id) {
-      throw new Btc1KeyManagerError('Verification method missing id');
+      throw new MultikeyError('Invalid verificationMethod: "id" required', VM_ERROR);
     }
 
     // Check if the required field controller is missing
     if (!controller) {
-      throw new Btc1KeyManagerError('Verification method missing controller');
+      throw new MultikeyError('Invalid verificationMethod: "controller" required', VM_ERROR);
     }
 
     // Check if the required field publicKeyMultibase is missing
     if (!publicKeyMultibase) {
-      throw new Btc1KeyManagerError('Verification method missing publicKeyMultibase');
+      throw new MultikeyError('Invalid verificationMethod: "publicKeyMultibase" required', VM_ERROR);
     }
 
     // Check if the type is not Multikey
     if (type !== 'Multikey') {
-      throw new Btc1KeyManagerError('Verification method has an invalid type');
+      throw new MultikeyError('Invalid verificationMethod: "type" should be "Multikey"', VM_ERROR);
     }
 
     // Decode the public key multibase
-    const publicKeyBytes = base58btc.decode(publicKeyMultibase);
-
+    const publicKeyMultibaseBytes = base58btc.decode(publicKeyMultibase);
+    console.log('publicKeyMultibaseBytes', publicKeyMultibaseBytes);
     // Check if the prefix is correct
-    const prefix = publicKeyBytes.slice(0, SECP256K1_XONLY_PREFIX.length);
+    const prefix = publicKeyMultibaseBytes.slice(0, SECP256K1_XONLY_PREFIX.length);
     if (!prefix.every((b, i) => b === SECP256K1_XONLY_PREFIX[i])) {
-      throw new Btc1KeyManagerError('Invalid publicKeyMultibase prefix');
+      throw new MultikeyError('Invalid publicKeyMultibase: incorrect prefix', VM_ERROR);
     }
 
-    // Get the publicKey by slicing off the prefix and return the multikey
-    const publicKey = publicKeyBytes.slice(SECP256K1_XONLY_PREFIX.length);
-    return new Multikey({ id, controller, publicKey: new PublicKey(publicKey) });
+    // Slice off the prefix to get just the 32-byte public key
+    const noPrefix = Array.from(publicKeyMultibaseBytes.slice(SECP256K1_XONLY_PREFIX.length));
+
+    // Create a new public key bytes array with the parity byte added
+    const publicKeyBytes = new Uint8Array([this.keyPair.publicKey.prefix, ...noPrefix]);
+
+    // Instantiate a new PublicKey
+    const publicKey = new PublicKey(publicKeyBytes);
+
+    // Return a new Multikey instance
+    return new Multikey({ id, controller, keyPair: new KeyPair({ publicKey }) });
   }
 
-  /**
-   * Returns true if this Multikey has a private key
-   * @readonly
-   * @type {boolean} True if this Multikey has a private key
-   */
+
+  /** @see IMultikey.isSigner */
   get isSigner(): boolean {
-    return !!this._keyPair;
+    return !!this.keyPair.privateKey;
   }
 
   /**
@@ -204,7 +184,8 @@ export class Multikey implements IMultikey {
    * @returns {Multikey} The new multikey instance
    */
   public static fromPrivateKey({ id, controller, privateKey }: FromPrivateKey): Multikey {
-    return new Multikey({ id, controller, keyPair: new KeyPair(new PrivateKey(privateKey)) });
+    const keyPair = KeyPair.fromPrivateKey(privateKey);
+    return new Multikey({ id, controller, keyPair });
   }
 
   /**
@@ -217,6 +198,7 @@ export class Multikey implements IMultikey {
    * @returns {Multikey} The new multikey instance
    */
   public static fromPublicKey({ id, controller, publicKey }: FromPublicKey): Multikey {
-    return new Multikey({ id, controller, publicKey: new PublicKey(publicKey) });
+    const keyPair = new KeyPair({ publicKey: new PublicKey(publicKey) });
+    return new Multikey({ id, controller, keyPair });
   }
 }

@@ -37,7 +37,7 @@ export class CryptosuiteJcs implements ICryptosuite {
   public type: DataIntegrityProofType = 'DataIntegrityProof';
 
   /** @type {string} The name of the cryptosuite */
-  public cryptosuite: string = 'bip-340-jcs-2025';
+  public cryptosuite: string = 'bip340-jcs-2025';
 
   /** @type {Multikey} The multikey used to sign and verify proofs */
   public multikey: Multikey;
@@ -121,15 +121,13 @@ export class CryptosuiteJcs implements ICryptosuite {
   }
 
   /** @see ICryptosuite.generateHash */
-  public generateHash({ canonicalProofConfig, canonicalDocument }: GenerateHashParams): HashHex {
+  public generateHash({ canonicalConfig, canonicalDocument }: GenerateHashParams): HashHex {
     // Convert the canonical proof config to buffer
-    const configBuffer = Buffer.from(canonicalProofConfig);
+    const configHash = sha256(Buffer.from(canonicalConfig));
     // Convert the canonical document to buffer
-    const documentBuffer = Buffer.from(canonicalDocument);
-    // Concatenate the buffers and hash the result
-    const bytesToHash = Buffer.concat([configBuffer, documentBuffer]);
+    const docHash = sha256(Buffer.from(canonicalDocument));
     // Return the hash as a hex string
-    return Buffer.from(sha256(bytesToHash)).toString('hex');
+    return sha256(Buffer.concat([configHash, docHash]));
   }
 
   /** @see ICryptosuite.proofConfiguration */

@@ -1,65 +1,62 @@
 import { DidVerificationMethod } from '@web5/dids';
 import { PublicKey } from '../../crypto/public-key.js';
-import { HashBytes, PrivateKeyBytes, SignatureBytes } from '../../types/shared.js';
+import { HashBytes, PrivateKeyBytes, PublicKeyBytes, SignatureBytes } from '../../types/shared.js';
 import { Multikey } from './index.js';
 import { PrivateKey } from '../../crypto/private-key.js';
+import { KeyPair } from '../../crypto/key-pair.js';
+export interface DidParams {
+  id: string;
+  controller: string;
+}
+
+export interface FromPrivateKey extends DidParams {
+  privateKey: PrivateKeyBytes;
+}
+export interface FromPublicKey extends DidParams {
+  publicKey: PublicKeyBytes;
+}
+export interface MultikeyParams extends DidParams {
+  keyPair?: KeyPair;
+}
 
 /**
- * Interface representing a BIP-340 Multikey.
+ * Interface representing a BIP340 Multikey.
  * @interface IMultikey
  */
 export interface IMultikey {
-  /**
-   * @readonly
-   * @type {string} The unique identifier of the multikey
-   */
+  /** @type {string} @readonly Get the Multikey id. */
   readonly id: string;
 
-  /**
-   * @readonly
-   * @type {string} The controller of the multikey
-   */
+  /** @type {string} @readonly Get the Multikey controller. */
   readonly controller: string;
 
-  /**
-   * @readonly
-   * @type {PublicKey} Lazily computes the public key bytes and returns a {@link PublicKey} instance
-   */
-  readonly publicKey?: PublicKey;
+  /** @type {KeyPair} @readonly Get the Multikey KeyPair. */
+  readonly keyPair: KeyPair;
 
-  /**
-   * @readonly
-   * @type {PrivateKey} Getter returns a copy of the private key, ensuring immutability
-   */
+  /** @type {PublicKey} @readonly Get the Multikey PublicKey. */
+  readonly publicKey: PublicKey;
+
+  /** @type {PrivateKey} @readonly Get the Multikey PrivateKey. */
   readonly privateKey?: PrivateKey;
 
-  /**
-   * Produce signed data with a private key
-   * @param {HashBytes} data Data to be signed
-   * @returns {SignatureBytes} Signature byte array
-   * @throws {Btc1KeyManagerError} if no private key is provided
-   */
-  sign(data: HashBytes): SignatureBytes;
+  /** @type {boolean} @readonly Get signing ability of the Multikey (i.e. is there a valid privateKey). */
+  readonly isSigner: boolean;
 
   /**
-   * Verify a signature
-   * @param {HashBytes} data Data for verification
-   * @param {SignatureBytes} signature Signature for verification
-   * @returns {boolean} If the signature is valid against the public key
+   * Produce signed data with a private key.
+   * @param {string} data Data to be signed.
+   * @returns {SignatureBytes} Signature byte array.
+   * @throws {Btc1KeyManagerError} if no private key is provided.
    */
-  verify(data: HashBytes, signature: SignatureBytes): boolean;
+  sign(data: string): SignatureBytes;
 
   /**
-   * Encode the PublicKey to Multibase Format
-   * @returns {string} The multibase formatted public key
+   * Verify a signature.
+   * @param {SignatureBytes} signature Signature for verification.
+   * @param {string} message Data for verification.
+   * @returns {boolean} If the signature is valid against the public key.
    */
-  encode(): string;
-
-  /**
-   * Decode the public key from Multibase Format to a PublicKey
-   * @returns {PublicKey} A public key instance
-   */
-  decode(): PublicKey;
+  verify(signature: SignatureBytes, message: string): boolean;
 
   /**
    * Get the full id of the multikey
@@ -68,18 +65,19 @@ export interface IMultikey {
   fullId(): string
 
   /**
-   * Convert the multikey to a verification method
-   * @returns {DidVerificationMethod} The verification method
+   * Convert the multikey to a verification method.
+   * @returns {DidVerificationMethod} The verification method.
    */
   toVerificationMethod(): DidVerificationMethod;
 
   /**
-   * Convert a verification method to a multikey
-   * @param {DidVerificationMethod} verificationMethod The verification method to convert
-   * @returns {Multikey} Multikey instance
-   * @throws {Btc1KeyManagerError} if the verification method is missing required fields
-   * @throws {Btc1KeyManagerError} if the verification method has an invalid type
-   * @throws {Btc1KeyManagerError} if the publicKeyMultibase has an invalid prefix
+   * Convert a verification method to a multikey.
+   * @param {DidVerificationMethod} verificationMethod The verification method to convert.
+   * @returns {Multikey} Multikey instance.
+   * @throws {MultikeyError}
+   * if the verification method is missing required fields.
+   * if the verification method has an invalid type.
+   * if the publicKeyMultibase has an invalid prefix.
    */
   fromVerificationMethod(verificationMethod: DidVerificationMethod): Multikey;
 }

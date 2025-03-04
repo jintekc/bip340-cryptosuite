@@ -70,8 +70,8 @@ export interface ICryptosuite {
   /**
    * Generate a hash of the canonical proof configuration and document.
    * @param {GenerateHashParams} params The parameters to use when generating the hash.
-   * @param {ProofOptions} params.canonicalConfig The canonicalized proof configuration.
-   * @param {InsecureDocument} params.canonicalDocument The canonicalized document.
+   * @param {string} params.canonicalConfig The canonicalized proof configuration.
+   * @param {string} params.canonicalDocument The canonicalized document.
    * @returns {HashBytes} The hash string of the proof configuration and document.
    */
   generateHash({ canonicalConfig, canonicalDocument }: GenerateHashParams): HashBytes;

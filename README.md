@@ -1,3 +1,3 @@
-# DID BTC1 Key Manager
+# Data Integrity BIP340 Cryptosuite
 
-Key manager for did-btc1 using Data Integrity Schnorr secp256k1 Cryptosuite v0.1
+TypeScript/JavaScript reference implementation of the [Data Integrity BIP340 Cryptosuite v0.1 specification](https://dcdpr.github.io/data-integrity-schnorr-secp256k1/).

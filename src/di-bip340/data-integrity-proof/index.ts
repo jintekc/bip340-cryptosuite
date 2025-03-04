@@ -1,4 +1,5 @@
 import { AddProofParams, Proof, SecureDocument, VerificationResult, VerifyProofParams } from '../../types/di-proof.js';
+import { ProofError } from '../../utils/error.js';
 import ObjectUtils from '../../utils/object-utils.js';
 import { Cryptosuite } from '../cryptosuite/index.js';
 import { IDataIntegrityProof } from './interface.js';
@@ -35,7 +36,7 @@ export class DataIntegrityProof implements IDataIntegrityProof {
 
     // Check if the type, verificationMethod, and proofPurpose are defined
     if (!type || !verificationMethod || !proofPurpose) {
-      throw new Error('PROOF_GENERATION_ERROR');
+      throw new ProofError('Missing properties: type, verificationMethod or proofPurpose', 'PROOF_GENERATION_ERROR');
     }
 
     // Deconstruct the domain from the proof object and check:
@@ -43,14 +44,14 @@ export class DataIntegrityProof implements IDataIntegrityProof {
     // TODO: Adjust the domain check to match the spec (domain as a list of urls)
     const { domain } = proof;
     if (options.domain && options.domain !== domain) {
-      throw new Error('PROOF_GENERATION_ERROR');
+      throw new ProofError('Domain mismatch between options and domain passed', 'PROOF_GENERATION_ERROR');
     }
 
     // Deconstruct the challenge from the proof object and check:
     // if options challenge is defined, ensure it matches the proof challenge
     const { challenge } = proof;
     if (options.challenge && options.challenge !== challenge) {
-      throw new Error('PROOF_GENERATION_ERROR');
+      throw new ProofError('Challenge mismatch options and challenge passed', 'PROOF_GENERATION_ERROR');
     }
 
     // Set the proof in the document and return as a SecureDocument

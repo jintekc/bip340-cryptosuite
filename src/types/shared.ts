@@ -11,6 +11,9 @@ export type MultikeyPrefix = Bytes;
 export type SignatureBytes = Bytes;
 export type ProofBytes = Bytes;
 export type HashBytes = Bytes;
+export type MessageBytes = Bytes;
+
+export type CompressedPublicKeyParityByte = 0x02 | 0x03;
 
 export type Base58BtcPrefix = 'z';
 export type PublicKeyMultibaseFormat = `${Base58BtcPrefix}66P${string}`;

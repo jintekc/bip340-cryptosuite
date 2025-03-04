@@ -1,7 +1,5 @@
 import { sha256 } from '@noble/hashes/sha256';
-import { LogLevel, LogMethod, SimpleLogger } from '@sphereon/ssi-types';
 import * as jcs from '@web5/crypto';
-import { createHash } from 'crypto';
 import { base58btc } from 'multiformats/bases/base58';
 import rdfc from 'rdf-canonize';
 import {
@@ -27,13 +25,6 @@ import { CryptosuiteError } from '../../utils/error.js';
 import { Multikey } from '../multikey/index.js';
 import { ICryptosuite } from './interface.js';
 
-// const logger = new SimpleLogger({
-//   namespace       : 'Cryptosuite',
-//   defaultLogLevel : LogLevel.INFO,
-//   methods         : [LogMethod.CONSOLE],
-// });
-
-// const roomyInfo = (message: any)  => console.info(message);
 /**
  * TODO: Test RDFC and figure out what the contexts should be
  * Implements sections
@@ -74,7 +65,7 @@ export class Cryptosuite implements ICryptosuite {
     // If the cryptosuite includes 'rdfc', use RDFC canonicalization else use JCS
     return algorithm === 'RDFC-1.0'
       ? await rdfc.canonize([object], { algorithm })
-      : jcs.canonicalize(object);
+      : await jcs.canonicalize(object);
   }
 
   /** @see ICryptosuite.createProof */
@@ -167,19 +158,16 @@ export class Cryptosuite implements ICryptosuite {
   public generateHash({ canonicalConfig, canonicalDocument }: GenerateHashParams): HashBytes {
     // Convert the canonical proof config to buffer
     const configBuffer = Buffer.from(canonicalConfig, 'utf-8');
-    // roomyInfo('\n configBuffer \n' + configBuffer);
+
     // Convert the canonical document to buffer
     const documentBuffer = Buffer.from(canonicalDocument, 'utf-8');
-    // roomyInfo('\n documentBuffer \n' + documentBuffer);
+
     // Concatenate the buffers and hash the result
     const bytesToHash = Buffer.concat([configBuffer, documentBuffer]);
-    // roomyInfo('\n bytesToHash \n' + bytesToHash);
-    const hash1 = createHash('sha256').update(bytesToHash).digest('hex');
-    // roomyInfo('\n hash1 \n' + hash1);
-    const hash2 = sha256(bytesToHash);
-    // roomyInfo('\n hash2 \n' + hash2);
-    // Return the hash as a hex string
-    return hash2;
+
+    // Hash both, concat, rehash and return
+    // Return the hash bytes
+    return sha256(bytesToHash);
   }
 
   /** @see ICryptosuite.proofConfiguration */

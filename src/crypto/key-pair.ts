@@ -1,100 +1,91 @@
 import { PrivateKeyBytes } from '../types/shared.js';
+import { KeyPairError } from '../utils/error.js';
+import { IKeyPair } from './interface.js';
 import { PrivateKey } from './private-key.js';
 import { PublicKey } from './public-key.js';
-import { IPrivateKey } from './private-key.js';
 
-/**
- * Interface for a key pair
- * @export
- * @interface IKeyPair
- * @type {IKeyPair}
- */
-export interface IKeyPair {
-  /** @type {PublicKey} The public key associated with this key pair */
-  readonly publicKey: PublicKey;
-
-  /** @type {PrivateKey} The private key associated with this key pair */
-  readonly privateKey: PrivateKey;
-
-  /** @type {KeyPair} Creates a KeyPair from an existing private key */
-  fromPrivateKey(privateKey: IPrivateKey): KeyPair;
+/** Params for the {@link KeyPair} constructor */
+interface KeyPairParams {
+  privateKey?: PrivateKey | null;
+  publicKey?: PublicKey | null;
 }
 
 /**
- * A compressed secp256k1 public/private key pair
+ * Encapsulates a PublicKey and a PrivateKey object as a single KeyPair object.
  * @export
  * @class KeyPair
  * @type {KeyPair}
  * @implements {IKeyPair}
  */
 export class KeyPair implements IKeyPair {
-  private _privateKey: PrivateKey;
+  /** @type {PrivateKey} The private key object */
+  private _privateKey: PrivateKey | null = null;
+
+  /** @type {PublicKey} The public key object */;
   private _publicKey: PublicKey;
 
   /**
-   * Creates an instance of KeyPair
+   * Creates an instance of KeyPair. Must provide a at least a private key.
+   * Can optionally provide btoh a private and public key, but must be a valid pair.
    * @constructor
-   * @param {PrivateKey} privateKey The private key bytes to use
+   * @param {PrivateKey} privateKey The private key object
    */
-  constructor(privateKey?: PrivateKey) {
-    // If there is no PrivateKey, generate one
-    this._privateKey = privateKey ?? new PrivateKey();
-    this._publicKey = this._privateKey.toPublicKey();
+  constructor({ privateKey, publicKey }: KeyPairParams = {} as KeyPairParams) {
+    // If no private key or public key, throw an error
+    if (!privateKey && !publicKey) {
+      throw new KeyPairError('Argument missing: must provide a publicKey', 'KEYPAIR_CONSTRUCTOR_ERROR');
+    }
+    // Set the private and public keys
+    this._privateKey = privateKey ?? null;
+    this._publicKey = publicKey as PublicKey ?? privateKey?.toPublicKey();
   }
 
-  /**
-   * Returns the public key
-   * @readonly
-   * @type {PublicKey} The public key object
-   */
+  /** @see IKeyPair.publicKey */
+  set publicKey(publicKey: PublicKey) {
+    this._publicKey = publicKey;
+  }
+
+  /** @see IKeyPair.publicKey */
   get publicKey(): PublicKey {
-    return this._publicKey;
+    const publicKey = this._publicKey;
+    return publicKey;
   }
 
-  /**
-   * Returns the private key
-   * @readonly
-   * @type {PrivateKey} The private key object
-   */
+  /** @see IKeyPair.privateKey */
   get privateKey(): PrivateKey {
-    return this._privateKey;
+    if(!this._privateKey) {
+      throw new KeyPairError('Private key not available', 'PRIVATE_KEY_ERROR');
+    }
+    const privateKey = this._privateKey;
+    return privateKey;
   }
 
   /**
-   * Creates a KeyPair from existing private key bytes
-   * @param {PrivateKeyBytes} bytes
-   * @returns {KeyPair}
-   */
-  public fromPrivateKeyBytes(bytes: PrivateKeyBytes): KeyPair {
-    return this.fromPrivateKey(new PrivateKey(bytes));
-  }
-
-  /**
-   * Creates a KeyPair from an existing private key
-   * @param privateKey The private key (must be valid)
-   * @returns {KeyPair}
-   */
-  public fromPrivateKey(privateKey: PrivateKey): KeyPair {
-    this._privateKey = privateKey;
-    return new KeyPair(privateKey);
-  }
-
-  /**
-   * Creates a KeyPair from an existing private key.
+   * Static method creates a new KeyPair from a PrivateKey object or private key bytes.
    * @static
-   * @param privateKey The private key (must be valid)
-   * @returns {KeyPair}
+   * @param {PrivateKey | PrivateKeyBytes} pk The private key bytes
+   * @returns {KeyPair} A new KeyPair object
    */
-  public static initialize(privateKey: PrivateKey): KeyPair {
-    return new KeyPair(privateKey);
+  public static fromPrivateKey(pk: PrivateKey | PrivateKeyBytes): KeyPair {
+    // If pk Uint8Array, construct PrivateKey object else use the object
+    const privateKey = pk instanceof Uint8Array ? new PrivateKey(pk) : pk;
+    // Derive a PublicKey object
+    const publicKey = privateKey.toPublicKey();
+    // Return a new KeyPair object
+    return new KeyPair({ privateKey, publicKey });
   }
 
   /**
-   * Generate a new key pair
+   * Static method generates a new KeyPair (PrivateKey, PublicKey).
    * @static
-   * @returns {KeyPair} A new key pair
+   * @returns {KeyPair} A new KeyPair object
    */
   public static generate(): KeyPair {
-    return new KeyPair();
+    // Generate a new random private key
+    const privateKey = new PrivateKey(PrivateKey.random());
+    // Derive the public key from the private key
+    const publicKey = privateKey.toPublicKey();
+    // Return a randomly generated KeyPair
+    return new KeyPair({ privateKey, publicKey });
   }
 }

@@ -1,3 +1,4 @@
+export * from './crypto/interface.js';
 export * from './crypto/key-pair.js';
 export * from './crypto/private-key.js';
 export * from './crypto/public-key.js';
@@ -18,5 +19,3 @@ export * from './types/shared.js';
 
 export * from './utils/error.js';
 export * from './utils/object-utils.js';
-
-export * from './btc1-key-manager.js';
