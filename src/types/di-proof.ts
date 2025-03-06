@@ -16,6 +16,7 @@ export interface Proof {
   '@context': Context;
   type?: DataIntegrityProofType;
   '@type'?: DataIntegrityProofType;
+  created?: string;
   cryptosuite: CryptosuiteType;
   verificationMethod: `${Btc1Identifier}#initialKey`;
   proofPurpose: string;

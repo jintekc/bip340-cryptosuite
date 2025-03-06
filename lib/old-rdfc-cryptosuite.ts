@@ -1,6 +1,8 @@
 import { sha256 } from '@noble/hashes/sha256';
-import * as jcs from '@web5/crypto';
 import { base58btc } from 'multiformats/bases/base58';
+import rdfc from 'rdf-canonize';
+import { ICryptosuite } from '../src/di-bip340/cryptosuite/interface.js';
+import { Multikey } from '../src/di-bip340/multikey/index.js';
 import {
   CanonicalizableObject,
   GenerateHashParams,
@@ -19,31 +21,27 @@ import {
 } from '../src/types/di-proof.js';
 import { HashHex, SignatureBytes } from '../src/types/shared.js';
 import { CryptosuiteError } from '../src/utils/error.js';
-import { Multikey } from '../src/di-bip340/multikey/index.js';
-import { ICryptosuite } from '../src/di-bip340/cryptosuite/interface.js';
 
 /**
  * Implements section
- * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#schnorr-secp256k1-jcs-2025 | 3.3 schnorr-secp256k1-jcs-2025}
- * of the
- * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity Schnorr Secp256k1 Cryptosuite v0.1}
- * specification
+ * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#schnorr-secp256k1-rdfc-2025 | 3.3 schnorr-secp256k1-rdfc-2025}
+ * of the {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity BIP-340 Cryptosuite} spec
  * @export
- * @class CryptosuiteJcs
- * @type {CryptosuiteJcs}
+ * @class CryptosuiteRdfc
+ * @type {CryptosuiteRdfc}
  */
-export class CryptosuiteJcs implements ICryptosuite {
+export class CryptosuiteRdfc implements ICryptosuite {
   /** @type {DataIntegrityProofType} The type of proof produced by the Cryptosuite */
   public type: DataIntegrityProofType = 'DataIntegrityProof';
 
   /** @type {string} The name of the cryptosuite */
-  public cryptosuite: string = 'schnorr-secp256k1-jcs-2025';
+  public cryptosuite: string = 'bip340-rdfc-2025';
 
   /** @type {Multikey} The multikey used to sign and verify proofs */
   public multikey: Multikey;
 
   /**
-   * Creates an instance of CryptosuiteJcs.
+   * Creates an instance of CryptosuiteRdfc.
    * @constructor
    * @param {Multikey} multikey The parameters to create the multikey
    */
@@ -51,9 +49,8 @@ export class CryptosuiteJcs implements ICryptosuite {
     this.multikey = multikey;
   }
 
-  /** @see ICryptosuite.canonicalize */
-  public canonicalize(object: CanonicalizableObject): string {
-    return jcs.canonicalize(object);
+  public async canonicalize(object: CanonicalizableObject): Promise<string> {
+    return await rdfc.canonize(object, { algorithm: 'RDFC-1.0' });
   }
 
   /** @see ICryptosuite.createProof */
@@ -116,8 +113,8 @@ export class CryptosuiteJcs implements ICryptosuite {
     if (cryptosuite !== this.cryptosuite) {
       throw new CryptosuiteError('Proof options cryptosuite name does not match cryptosuite name', ERROR_TYPE);
     }
-    // Return the JCS canonicalized document
-    return this.canonicalize(document);
+    // Return the RDFC canonicalized document
+    return await this.canonicalize(document);
   }
 
   /** @see ICryptosuite.generateHash */
@@ -148,8 +145,8 @@ export class CryptosuiteJcs implements ICryptosuite {
     if (cryptosuite !== this.cryptosuite) {
       throw new CryptosuiteError(`Options cryptosuite ${cryptosuite} !== ${this.cryptosuite}`, ERROR_TYPE);
     }
-    // Return the JCS canonicalized proof configuration
-    return this.canonicalize(options);
+    // Return the RDFC canonicalized proof configuration
+    return await this.canonicalize(options);
   }
 
   /** @see ICryptosuite.proofSerialization */
