@@ -1,4 +1,4 @@
-import { KeyPair } from '../src/crypto/key-pair.js';
+import { KeyPair } from '../src/keys/key-pair.js';
 import { Multikey } from '../src/di-bip340/multikey/index.js';
 // Crypto Constants
 const privateKeyBytes = new Uint8Array([

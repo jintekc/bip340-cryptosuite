@@ -1,5 +1,5 @@
-import { KeyPair } from '../src/crypto/key-pair.js';
-import { PrivateKey } from '../src/crypto/private-key.js';
+import { KeyPair } from '../src/keys/key-pair.js';
+import { PrivateKey } from '../src/keys/private-key.js';
 import { Cryptosuite } from '../src/di-bip340/cryptosuite/index.js';
 import { DataIntegrityProof } from '../src/di-bip340/data-integrity-proof/index.js';
 import { Multikey } from '../src/di-bip340/multikey/index.js';

@@ -1,9 +1,9 @@
 import { DidVerificationMethod } from '@web5/dids';
-import { PublicKey } from '../../crypto/public-key.js';
-import { HashBytes, PrivateKeyBytes, PublicKeyBytes, SignatureBytes } from '../../types/shared.js';
+import { PublicKey } from '../../keys/public-key.js';
+import { HashBytes, MessageBytes, PrivateKeyBytes, PublicKeyBytes, SignatureBytes } from '../../types/shared.js';
 import { Multikey } from './index.js';
-import { PrivateKey } from '../../crypto/private-key.js';
-import { KeyPair } from '../../crypto/key-pair.js';
+import { PrivateKey } from '../../keys/private-key.js';
+import { KeyPair } from '../../keys/key-pair.js';
 export interface DidParams {
   id: string;
   controller: string;
@@ -44,11 +44,11 @@ export interface IMultikey {
 
   /**
    * Produce signed data with a private key.
-   * @param {string} data Data to be signed.
+   * @param {MessageBytes} data Data to be signed.
    * @returns {SignatureBytes} Signature byte array.
-   * @throws {Btc1KeyManagerError} if no private key is provided.
+   * @throws {MultikeyError} if no private key is provided.
    */
-  sign(data: string): SignatureBytes;
+  sign(data: MessageBytes): SignatureBytes;
 
   /**
    * Verify a signature.

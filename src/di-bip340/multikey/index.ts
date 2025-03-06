@@ -2,13 +2,13 @@ import { schnorr } from '@noble/curves/secp256k1';
 import { DidVerificationMethod } from '@web5/dids';
 import { randomBytes } from 'crypto';
 import { base58btc } from 'multiformats/bases/base58';
-import { KeyPair } from '../../crypto/key-pair.js';
-import { PrivateKey } from '../../crypto/private-key.js';
-import { PublicKey } from '../../crypto/public-key.js';
-import { HashBytes, SignatureBytes } from '../../types/shared.js';
+import { KeyPair } from '../../keys/key-pair.js';
+import { PrivateKey } from '../../keys/private-key.js';
+import { PublicKey } from '../../keys/public-key.js';
+import { Hex, SignatureBytes } from '../../types/shared.js';
 import { MultikeyError } from '../../utils/error.js';
 import { FromPrivateKey, FromPublicKey, IMultikey, MultikeyParams } from './interface.js';
-import { SECP256K1_XONLY_PREFIX } from './utils.js';
+import { SECP256K1_XONLY_PREFIX } from '../../keys/constants.js';
 
 /**
  * Implements section
@@ -87,19 +87,19 @@ export class Multikey implements IMultikey {
   }
 
   /** @see IMultikey.sign */
-  public sign(message: string): SignatureBytes {
+  public sign(data: Hex): SignatureBytes {
     // If there is no private key, throw an error
     if (!this.isSigner) {
       throw new MultikeyError('Cannot sign: no privateKey', 'MULTIKEY_SIGN_ERROR');
     }
     // Sign the hashb and return it
-    return schnorr.sign(Buffer.from(message), this.privateKey.raw, randomBytes(32));
+    return schnorr.sign(data, this.privateKey.raw, randomBytes(32));
   }
 
   /** @see IMultikey.verify */
-  public verify(signature: SignatureBytes, message: string): boolean {
+  public verify(signature: SignatureBytes, data: Hex): boolean {
     // Verify the signature and return the result
-    return schnorr.verify(signature, message, this.publicKey.x);
+    return schnorr.verify(signature, data, this.publicKey.x);
   }
 
   /** @see IMultikey.fullId */

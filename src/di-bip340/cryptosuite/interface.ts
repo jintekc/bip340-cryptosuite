@@ -14,7 +14,7 @@ import {
   SecureDocument,
   VerificationResult
 } from '../../types/di-proof.js';
-import { HashBytes, HashHex, ProofBytes, SignatureBytes } from '../../types/shared.js';
+import { HashBytes, SignatureBytes } from '../../types/shared.js';
 import { Multikey } from '../multikey/index.js';
 
 /**
@@ -88,21 +88,21 @@ export interface ICryptosuite {
   /**
    * Serialize the proof into a byte array.
    * @param {SerializeParams} params The parameters to use when serializing the proof.
-   * @param {HashBytes} params.hashBytes The canonicalized proof configuration.
+   * @param {HashBytes} params.hash The canonicalized proof configuration.
    * @param {ProofOptions} params.options The options to use when serializing the proof.
    * @returns {SignatureBytes} The serialized proof.
    * @throws {CryptosuiteError} if the multikey does not match the verification method.
    */
-  proofSerialization({ hashBytes, options }: SerializeParams): SignatureBytes;
+  proofSerialization({ hash, options }: SerializeParams): SignatureBytes;
 
   /**
    * Verify the proof by comparing the hash of the proof configuration and document to the proof bytes.
    * @param {VerificationParams} params The parameters to use when verifying the proof.
-   * @param {HashBytes} params.hashBytes The canonicalized proof configuration.
-   * @param {ProofBytes} params.proofBytes The serialized proof.
+   * @param {HashBytes} params.hash The canonicalized proof configuration.
+   * @param {SignatureBytes} params.signature The serialized proof.
    * @param {ProofOptions} params.options The options to use when verifying the proof.
    * @returns {boolean} True if the proof is verified, false otherwise.
    * @throws {CryptosuiteError} if the multikey does not match the verification method.
    */
-  proofVerification({ hashBytes, proofBytes, options }: VerificationParams): boolean;
+  proofVerification({ hash, signature, options }: VerificationParams): boolean;
 }

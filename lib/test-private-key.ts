@@ -1,4 +1,4 @@
-import { PrivateKey } from '../src/crypto/private-key.js';
+import { PrivateKey } from '../src/keys/private-key.js';
 
 const privateKeyBytes = new Uint8Array([
   115, 253, 220, 18, 252, 147, 66, 187,
@@ -8,10 +8,10 @@ const privateKeyBytes = new Uint8Array([
 ]);
 const prvFromSec = PrivateKey.fromSecret(52464508790539176856770556715241483442035423615466097401201513777400180778402n);
 console.log('prvFromSec', prvFromSec);
-const pubFromPk = prvFromSec.toPublicKey();
+const pubFromPk = prvFromSec.computePublicKey();
 console.log('pubFromPk', pubFromPk);
 
 const privateKey = new PrivateKey(privateKeyBytes);
 console.log('new privateKey', privateKey);
-const publicKey = privateKey.toPublicKey();
+const publicKey = privateKey.computePublicKey();
 console.log('publicKey', publicKey);

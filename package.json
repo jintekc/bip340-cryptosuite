@@ -1,5 +1,5 @@
 {
-  "name": "bip340-2025-cryptosuite",
+  "name": "@did-btc1/bip340-2025-cryptosuite",
   "version": "1.4.0",
   "type": "module",
   "description": "TypeScript/JavaScript reference implementation of the Data Integrity BIP340 Cryptosuite v0.1 specification",

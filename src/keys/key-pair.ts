@@ -37,7 +37,7 @@ export class KeyPair implements IKeyPair {
     }
     // Set the private and public keys
     this._privateKey = privateKey ?? null;
-    this._publicKey = publicKey as PublicKey ?? privateKey?.toPublicKey();
+    this._publicKey = publicKey as PublicKey ?? privateKey?.computePublicKey();
   }
 
   /** @see IKeyPair.publicKey */
@@ -70,7 +70,7 @@ export class KeyPair implements IKeyPair {
     // If pk Uint8Array, construct PrivateKey object else use the object
     const privateKey = pk instanceof Uint8Array ? new PrivateKey(pk) : pk;
     // Derive a PublicKey object
-    const publicKey = privateKey.toPublicKey();
+    const publicKey = privateKey.computePublicKey();
     // Return a new KeyPair object
     return new KeyPair({ privateKey, publicKey });
   }
@@ -84,7 +84,7 @@ export class KeyPair implements IKeyPair {
     // Generate a new random private key
     const privateKey = new PrivateKey(PrivateKey.random());
     // Derive the public key from the private key
-    const publicKey = privateKey.toPublicKey();
+    const publicKey = privateKey.computePublicKey();
     // Return a randomly generated KeyPair
     return new KeyPair({ privateKey, publicKey });
   }

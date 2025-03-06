@@ -1,5 +1,6 @@
 import { Hex } from '@noble/secp256k1';
 import { PrivateKeyBytes, PublicKeyBytes } from '../types/shared.js';
+import { KeyPair } from './key-pair.js';
 import { PrivateKey } from './private-key.js';
 import { PublicKey } from './public-key.js';
 
@@ -27,10 +28,10 @@ export interface IPrivateKey {
   equals(other: PrivateKey): boolean;
 
   /**
-   * Uses the private key to derive the corresponding public key.
+   * Uses the private key to compute the corresponding public key.
    * @returns {PublicKey} A new PublicKey object
    */
-  toPublicKey(): PublicKey;
+  computePublicKey(): PublicKey;
 
   /**
    * Returns the private key as a hex string
@@ -90,6 +91,12 @@ export interface IPublicKey {
    * @returns {boolean} True if the public keys are equal
    */
   equals(other: PublicKey): boolean;
+}
+
+export interface IPublicKeyUtils {
+  generate(): KeyPair;
+  decode(publicKeyMultibase: string): PublicKeyBytes;
+  encode(xOnlyPublicKeyBytes: PublicKeyBytes): string;
 }
 
 /**

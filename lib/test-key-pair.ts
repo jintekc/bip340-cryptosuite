@@ -1,4 +1,4 @@
-import { KeyPair } from '../src/crypto/key-pair.js';
+import { KeyPair } from '../src/keys/key-pair.js';
 
 const privateKeyBytes = new Uint8Array([
   115, 253, 220, 18, 252, 147, 66, 187,

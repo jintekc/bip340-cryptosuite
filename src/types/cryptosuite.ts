@@ -1,6 +1,6 @@
 import { Multikey } from '../di-bip340/multikey/index.js';
 import { DataIntegrityProofType, InsecureDocument, ProofOptions, SecureDocument } from './di-proof.js';
-import { HashBytes, ProofBytes } from './shared.js';
+import { HashBytes, SignatureBytes } from './shared.js';
 
 export type ProofOptionsParam = { options: ProofOptions }
 export type InsecureDocumentParams = ProofOptionsParam & {
@@ -17,12 +17,12 @@ export type DocumentParams = {
 export type CanonicalizableObject = Record<string, any>;
 export type TransformParams = DocumentParams & ProofOptionsParam;
 export type SerializeParams = {
-  message: string;
+  hash: HashBytes;
   options: ProofOptions;
 };
 export type VerificationParams = {
-  hashBytes: HashBytes;
-  proofBytes: ProofBytes;
+  hash: HashBytes;
+  signature: SignatureBytes;
   options: ProofOptions;
 }
 export type GenerateHashParams = {
