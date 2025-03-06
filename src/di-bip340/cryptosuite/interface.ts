@@ -70,11 +70,11 @@ export interface ICryptosuite {
   /**
    * Generate a hash of the canonical proof configuration and document.
    * @param {GenerateHashParams} params The parameters to use when generating the hash.
-   * @param {ProofOptions} params.canonicalProofConfig The canonicalized proof configuration.
-   * @param {InsecureDocument} params.canonicalDocument The canonicalized document.
+   * @param {string} params.canonicalConfig The canonicalized proof configuration.
+   * @param {string} params.canonicalDocument The canonicalized document.
    * @returns {HashHex} The hash string of the proof configuration and document.
    */
-  generateHash({ canonicalProofConfig, canonicalDocument }: GenerateHashParams): HashHex;
+  generateHash({ canonicalConfig, canonicalDocument }: GenerateHashParams): HashHex;
 
   /**
    * Configure the proof by canonicalzing it.
@@ -88,21 +88,21 @@ export interface ICryptosuite {
   /**
    * Serialize the proof into a byte array.
    * @param {SerializeParams} params The parameters to use when serializing the proof.
-   * @param {string} params.hashData The canonicalized proof configuration.
+   * @param {HashBytes} params.hash The canonicalized proof configuration.
    * @param {ProofOptions} params.options The options to use when serializing the proof.
    * @returns {SignatureBytes} The serialized proof.
    * @throws {CryptosuiteError} if the multikey does not match the verification method.
    */
-  proofSerialization({ hashData, options }: SerializeParams): SignatureBytes;
+  proofSerialization({ hash, options }: SerializeParams): SignatureBytes;
 
   /**
    * Verify the proof by comparing the hash of the proof configuration and document to the proof bytes.
    * @param {VerificationParams} params The parameters to use when verifying the proof.
-   * @param {string} params.hashData The canonicalized proof configuration.
-   * @param {Uint8Array} params.proofBytes The serialized proof.
+   * @param {HashBytes} params.hash The canonicalized proof configuration.
+   * @param {SignatureBytes} params.signature The serialized proof.
    * @param {ProofOptions} params.options The options to use when verifying the proof.
    * @returns {boolean} True if the proof is verified, false otherwise.
    * @throws {CryptosuiteError} if the multikey does not match the verification method.
    */
-  proofVerification({ hashData, proofBytes, options }: VerificationParams): boolean;
+  proofVerification({ hash, signature, options }: VerificationParams): boolean;
 }

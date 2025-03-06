@@ -1,8 +1,8 @@
 {
-  "name": "@did-btc1/key-manager",
-  "version": "1.3.1",
-  "description": "Key manager for did-btc1 using Data Integrity BIP-340 Cryptosuite v0.1",
+  "name": "@did-btc1/bip340-2025-cryptosuite",
+  "version": "2.1.0",
   "type": "module",
+  "description": "TypeScript/JavaScript reference implementation of the Data Integrity BIP340 Cryptosuite v0.1 specification",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
@@ -23,29 +23,32 @@
     "build": "pnpm clean && pnpm build:esm && pnpm build:cjs",
     "build:esm": "rimraf dist/esm dist/types && pnpm tsc -p tsconfig.json",
     "build:cjs": "rimraf dist/cjs && tsc -p tsconfig.cjs.json && echo '{\"type\": \"commonjs\"}' > ./dist/cjs/package.json",
-    "build:tests:node": "rimraf tests/compiled && pnpm tsc -p tests/tsconfig.json",
+    "build:tests": "rimraf tests/compiled && pnpm tsc -p tests/tsconfig.json",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
-    "test:node": "pnpm build:tests:node && pnpm c8 mocha",
-    "build:test": "pnpm build && pnpm build:tests:node && pnpm test:node",
-    "build:lint:test": "pnpm build && pnpm build:tests:node && pnpm lint:fix",
+    "test": "pnpm build && pnpm build:tests && pnpm c8 mocha",
+    "test:node": "pnpm c8 mocha",
+    "build:lint:test": "pnpm build && pnpm build:tests && pnpm lint:fix",
+    "pack": "pnpm build && pnpm pack && mv *.tgz releases",
     "prepublish": "pnpm build",
     "version": "pnpm version",
-    "version:no-git": "pnpm version --no-commit-hooks --no-git-tag-version"
+    "version:no-git": "pnpm version --no-commit-hooks --no-git-tag-version",
+    "version:new": "[ -z \"$NEW_VERSION\" ] && echo 'ERROR: NEW_VERSION is not set' && exit 1 || (git checkout -b $NEW_VERSION && git tag $NEW_VERSION && pnpm version:no-git $NEW_VERSION)"
   },
   "license": "MPL-2.0",
   "contributors": [
     {
       "name": "jintekc",
-      "url": "https://github.com/jintekc"
+      "url": "https://github.com/jintekc",
+      "email": "github@jintek.consulting"
     }
   ],
-  "homepage": "https://github.com/jintekc/did-btc1-key-manager",
-  "repository": {
+  "homepage": "https://dcdpr.github.io/data-integrity-schnorr-secp256k1/",
+  "respository": {
     "type": "git",
-    "url": "git+ssh://git@github.com:jintekc/did-btc1-key-manager.git"
+    "url": "git+ssh://git@github.com:jintekc/bip340-2025-cryptosuite.git"
   },
-  "bugs": "https://github.com/jintekc/did-btc1-key-manager/issues",
+  "bugs": "https://github.com/jintekc/bip340-2025-cryptosuite/issues",
   "publishConfig": {
     "access": "public"
   },
@@ -71,14 +74,13 @@
   "dependencies": {
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
-    "@noble/secp256k1": "^2.2.3",
     "@sphereon/ssi-types": "^0.32.0",
-    "@web5/crypto": "^1.0.6",
     "@web5/dids": "^1.2.0",
     "jsonld-document-loader": "^2.3.0",
     "jsonld-signatures": "^11.5.0",
     "multiformats": "^13.3.2",
-    "rdf-canonize": "^4.0.1"
+    "rdf-canonize": "^4.0.1",
+    "tiny-secp256k1": "^2.2.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",

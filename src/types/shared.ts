@@ -1,22 +1,28 @@
+export type Hex = Uint8Array | string;
+export type PrivateKeyHex = Hex;
+export type PublicKeyHex = Hex;
+export type SignatureHex = Hex;
+export type HashHex = Hex;
+
 export type Bytes = Uint8Array;
-export type Hex = Bytes | string;
-export type PrivateKey = Hex;
-export type PublicKey = Hex;
 export type PrivateKeyBytes = Bytes;
 export type PublicKeyBytes = Bytes;
-export type MultikeyPrefix = Bytes;
+export type PrefixBytes = Bytes;
+export type PublicKeyMultibaseBytes = Bytes;
 export type SignatureBytes = Bytes;
 export type ProofBytes = Bytes;
-export type SignatureHex = string;
 export type HashBytes = Bytes;
-export type HashHex = string;
-export type Signature = Hex;
+export type MessageBytes = Bytes;
+
+export type CompressedPublicKeyParityByte = 0x02 | 0x03;
+
 export type Base58BtcPrefix = 'z';
-export type PublicKeyMultibase = `${Base58BtcPrefix}66P${string}`;
+export type PublicKeyMultibaseFormat = `${Base58BtcPrefix}66P${string}`;
 export type SchnorrKeyPair = {
   privateKey: PrivateKeyBytes;
   publicKey: PublicKeyBytes;
 };
+
 export type DID = 'did';
 export type MethodName = string;
 export type MethodSpecificId = string;
@@ -42,3 +48,8 @@ export type Seconds = TwoDigits;
 export type UtcTimestamp = `${Year}-${Month}-${Day}T${Hours}:${Minutes}:${Seconds}`;
 export type TzOffset = `${Hours}:${Minutes}`;
 export type DateTimestamp = `${UtcTimestamp}Z` | `${UtcTimestamp}-${TzOffset}`;
+export type DecodedPublicKeyMultibase = {
+  prefix: PrefixBytes;
+  publicKey: PublicKeyBytes;
+  multibase: PublicKeyMultibaseBytes;
+};

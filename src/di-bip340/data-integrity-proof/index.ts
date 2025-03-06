@@ -1,4 +1,6 @@
 import { AddProofParams, Proof, SecureDocument, VerificationResult, VerifyProofParams } from '../../types/di-proof.js';
+import { ProofError } from '../../utils/error.js';
+import ObjectUtils from '../../utils/object-utils.js';
 import { Cryptosuite } from '../cryptosuite/index.js';
 import { IDataIntegrityProof } from './interface.js';
 
@@ -26,44 +28,44 @@ export class DataIntegrityProof implements IDataIntegrityProof {
 
   /** @see IDataIntegrityProof.addProof */
   public async addProof({ document, options }: AddProofParams): Promise<SecureDocument> {
-    // Create a copy of the document
-    const secure = document as SecureDocument;
-
     // Generate the proof
-    const proof = await this.cryptosuite.createProof({ document: secure, options });
+    const proof = await this.cryptosuite.createProof({ document, options });
 
     // Deconstruct the proof object
     const { type, verificationMethod, proofPurpose } = proof;
 
     // Check if the type, verificationMethod, and proofPurpose are defined
     if (!type || !verificationMethod || !proofPurpose) {
-      throw new Error('PROOF_GENERATION_ERROR');
+      throw new ProofError('Missing properties: type, verificationMethod or proofPurpose', 'PROOF_GENERATION_ERROR');
     }
 
-    // Deconstruct the proof object
+    // Deconstruct the domain from the proof object and check:
+    // if the options domain is defined, ensure it matches the proof domain
+    // TODO: Adjust the domain check to match the spec (domain as a list of urls)
     const { domain } = proof;
-    // Check if the domain is defined and if it matches the domain
     if (options.domain && options.domain !== domain) {
-      throw new Error('PROOF_GENERATION_ERROR');
+      throw new ProofError('Domain mismatch between options and domain passed', 'PROOF_GENERATION_ERROR');
     }
 
-    // Deconstruct the proof object
+    // Deconstruct the challenge from the proof object and check:
+    // if options challenge is defined, ensure it matches the proof challenge
     const { challenge } = proof;
-    // Check if the challenge is defined and if it matches the challenge
     if (options.challenge && options.challenge !== challenge) {
-      throw new Error('PROOF_GENERATION_ERROR');
+      throw new ProofError('Challenge mismatch options and challenge passed', 'PROOF_GENERATION_ERROR');
     }
 
-    // Set the proof in the secure document and return it
-    secure.proof = proof;
-    return secure;
+    // Set the proof in the document and return as a SecureDocument
+    return { ...document, proof } as SecureDocument;
   }
 
   /** @see IDataIntegrityProof.verifyProof */
-  public async verifyProof(params: VerifyProofParams): Promise<VerificationResult> {
-    // Deconstruct the params object
-    const { mediaType, document, expectedPurpose, expectedDomain, expectedChallenge } = params;
-
+  public async verifyProof({
+    mediaType,
+    document,
+    expectedPurpose,
+    expectedDomain,
+    expectedChallenge
+  }: VerifyProofParams): Promise<VerificationResult> {
     // Parse the document
     const secure = JSON.parse(document) as SecureDocument;
 
@@ -103,12 +105,17 @@ export class DataIntegrityProof implements IDataIntegrityProof {
     }
 
     // Verify the proof
-    const verificationResult = await this.cryptosuite.verifyProof(secure);
+    const { verified, verifiedDocument, mediaType: mt } = await this.cryptosuite.verifyProof(secure);
 
     // Add the mediaType to the verification result
-    verificationResult.mediaType = mediaType;
+    mediaType ??= mt;
+
+    const sansProof = ObjectUtils.delete({
+      obj : verifiedDocument as Record<string, any>,
+      key : 'proof'
+    }) as SecureDocument;
 
     // Return the verification result
-    return verificationResult;
+    return {verified, verifiedDocument: verified ? sansProof : undefined, mediaType};
   }
 }

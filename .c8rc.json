@@ -13,6 +13,7 @@
     "tests/compiled/**/src/types/**"
   ],
   "reporter": [
+    "cobertura",
     "text"
   ]
 }

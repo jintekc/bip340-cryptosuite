@@ -1,4 +1,4 @@
-# Data Integrity Schnorr secp256k1 Cryptosuites v0.1
+# Data Integrity BIP340 Cryptosuites v0.1
 
 View the latest published specifciation [data-integrity-schnorr-secp256k1](https://dcdpr.github.io/data-integrity-schnorr-secp256k1/)
 

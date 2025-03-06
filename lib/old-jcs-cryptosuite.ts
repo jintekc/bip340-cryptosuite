@@ -1,8 +1,6 @@
 import { sha256 } from '@noble/hashes/sha256';
+import * as jcs from '@web5/crypto';
 import { base58btc } from 'multiformats/bases/base58';
-import rdfc from 'rdf-canonize';
-import { ICryptosuite } from '../src/di-bip340/cryptosuite/interface.js';
-import { Multikey } from '../src/di-bip340/multikey/index.js';
 import {
   CanonicalizableObject,
   GenerateHashParams,
@@ -21,27 +19,31 @@ import {
 } from '../src/types/di-proof.js';
 import { HashHex, SignatureBytes } from '../src/types/shared.js';
 import { CryptosuiteError } from '../src/utils/error.js';
+import { Multikey } from '../src/di-bip340/multikey/index.js';
+import { ICryptosuite } from '../src/di-bip340/cryptosuite/interface.js';
 
 /**
  * Implements section
- * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#schnorr-secp256k1-rdfc-2025 | 3.3 schnorr-secp256k1-rdfc-2025}
- * of the {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity BIP-340 Cryptosuite} spec
+ * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#schnorr-secp256k1-jcs-2025 | 3.3 schnorr-secp256k1-jcs-2025}
+ * of the
+ * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity Schnorr Secp256k1 Cryptosuite v0.1}
+ * specification
  * @export
- * @class CryptosuiteRdfc
- * @type {CryptosuiteRdfc}
+ * @class CryptosuiteJcs
+ * @type {CryptosuiteJcs}
  */
-export class CryptosuiteRdfc implements ICryptosuite {
+export class CryptosuiteJcs implements ICryptosuite {
   /** @type {DataIntegrityProofType} The type of proof produced by the Cryptosuite */
   public type: DataIntegrityProofType = 'DataIntegrityProof';
 
   /** @type {string} The name of the cryptosuite */
-  public cryptosuite: string = 'schnorr-secp256k1-rdfc-2025';
+  public cryptosuite: string = 'bip340-jcs-2025';
 
   /** @type {Multikey} The multikey used to sign and verify proofs */
   public multikey: Multikey;
 
   /**
-   * Creates an instance of CryptosuiteRdfc.
+   * Creates an instance of CryptosuiteJcs.
    * @constructor
    * @param {Multikey} multikey The parameters to create the multikey
    */
@@ -49,8 +51,9 @@ export class CryptosuiteRdfc implements ICryptosuite {
     this.multikey = multikey;
   }
 
-  public async canonicalize(object: CanonicalizableObject): Promise<string> {
-    return await rdfc.canonize(object, { algorithm: 'RDFC-1.0' });
+  /** @see ICryptosuite.canonicalize */
+  public canonicalize(object: CanonicalizableObject): string {
+    return jcs.canonicalize(object);
   }
 
   /** @see ICryptosuite.createProof */
@@ -113,20 +116,18 @@ export class CryptosuiteRdfc implements ICryptosuite {
     if (cryptosuite !== this.cryptosuite) {
       throw new CryptosuiteError('Proof options cryptosuite name does not match cryptosuite name', ERROR_TYPE);
     }
-    // Return the RDFC canonicalized document
-    return await this.canonicalize(document);
+    // Return the JCS canonicalized document
+    return this.canonicalize(document);
   }
 
   /** @see ICryptosuite.generateHash */
-  public generateHash({ canonicalProofConfig, canonicalDocument }: GenerateHashParams): HashHex {
+  public generateHash({ canonicalConfig, canonicalDocument }: GenerateHashParams): HashHex {
     // Convert the canonical proof config to buffer
-    const configBuffer = Buffer.from(canonicalProofConfig);
+    const configHash = sha256(Buffer.from(canonicalConfig));
     // Convert the canonical document to buffer
-    const documentBuffer = Buffer.from(canonicalDocument);
-    // Concatenate the buffers and hash the result
-    const bytesToHash = Buffer.concat([configBuffer, documentBuffer]);
+    const docHash = sha256(Buffer.from(canonicalDocument));
     // Return the hash as a hex string
-    return Buffer.from(sha256(bytesToHash)).toString('hex');
+    return sha256(Buffer.concat([configHash, docHash]));
   }
 
   /** @see ICryptosuite.proofConfiguration */
@@ -145,8 +146,8 @@ export class CryptosuiteRdfc implements ICryptosuite {
     if (cryptosuite !== this.cryptosuite) {
       throw new CryptosuiteError(`Options cryptosuite ${cryptosuite} !== ${this.cryptosuite}`, ERROR_TYPE);
     }
-    // Return the RDFC canonicalized proof configuration
-    return await this.canonicalize(options);
+    // Return the JCS canonicalized proof configuration
+    return this.canonicalize(options);
   }
 
   /** @see ICryptosuite.proofSerialization */
