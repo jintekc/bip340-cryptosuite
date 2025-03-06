@@ -32,7 +32,10 @@ export class PrivateKey implements IPrivateKey {
     this._bytes = bytes;
   }
 
-  /** @see IPrivateKey.secret */
+  /**
+   * Set the private key from a secret to bytes.
+   * @type {BigInt} The private key secret.
+   */
   set secret(s: bigint) {
     // Convert bigint to bytes and set the private key
     this._bytes = Uint8Array.from({ length: 32 }, (_, i) => Number(s >> BigInt(8 * (31 - i)) & BigInt(0xff)));
@@ -57,7 +60,6 @@ export class PrivateKey implements IPrivateKey {
   /** @see IPrivateKey.point */
   get point(): BigInt {
     // Multiply the generator point by the private key
-    // return BigInt(CURVE.Gx * utils.normPrivateKeyToScalar(this.raw));
     const publicKey = tinysecp.pointFromScalar(this.raw, true);
     // If no public key, throw error
     if (!publicKey) {
