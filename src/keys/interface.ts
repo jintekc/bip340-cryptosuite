@@ -11,13 +11,23 @@ import { PublicKey } from './public-key.js';
  * @type {IPrivateKey}
  */
 export interface IPrivateKey {
-  /** @readonly @type {PrivateKeyBytes} Get the private key bytes */
+  /**
+   * Get the private key bytes
+   * @readonly @type {PrivateKeyBytes} The private key bytes.
+   */
   raw: PrivateKeyBytes;
 
-  /** @type {BigInt} Get/set the private key secret */
+  /**
+   * Getter returns the private key bytes in secret form.
+   * Setter allows alternative method of using a bigint secret to genereate the private key bytes.
+   * @type {BigInt} The private key secret.
+   */
   secret: BigInt;
 
-  /** @readonly @type {BigInt} Get the private key point */
+  /**
+   * Get the private key point
+   * @readonly @type {BigInt} The private key point.
+   */
   point: BigInt;
 
   /**
@@ -29,6 +39,7 @@ export interface IPrivateKey {
 
   /**
    * Uses the private key to compute the corresponding public key.
+   * @public
    * @returns {PublicKey} A new PublicKey object
    */
   computePublicKey(): PublicKey;
