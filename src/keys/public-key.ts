@@ -3,7 +3,7 @@ import * as tinysecp from 'tiny-secp256k1';
 import { Hex, PrivateKeyBytes, PublicKeyBytes } from '../types/shared.js';
 import { PublicKeyError } from '../utils/error.js';
 import { IPublicKey } from './interface.js';
-import { PrivateKey } from './private-key.js';
+import { PrivateKey, PrivateKeyUtils } from './private-key.js';
 import { SECP256K1_XONLY_PREFIX } from './constants.js';
 
 /**
@@ -27,12 +27,12 @@ export class PublicKey implements IPublicKey {
    */
   constructor(bytes: PublicKeyBytes) {
     const bytelength = bytes.length;
-    // if(bytelength === 33 && bytes[0] === 3) {
-    //   throw new PublicKeyError(
-    //     'Invalid argument: "bytes" must be 32-byte x-only or 33-byte compressed with 0x02 prefix',
-    //     'PUBLIC_KEY_CONSTRUCTOR_ERROR'
-    //   );
-    // }
+    if(bytelength === 33 && bytes[0] === 3) {
+      throw new PublicKeyError(
+        'Invalid argument: "bytes" must be 32-byte x-only or 33-byte compressed with 0x02 prefix',
+        'PUBLIC_KEY_CONSTRUCTOR_ERROR'
+      );
+    }
     this._bytes = bytelength === 32 ? new Uint8Array([0x02, ...Array.from(bytes)]) : bytes;
   }
 
@@ -75,8 +75,8 @@ export class PublicKey implements IPublicKey {
 
   /** @see IPublicKey.decode */
   /** @see PublicKeyUtils.decode */
-  public decode(): PublicKey {
-    return new PublicKey(PublicKeyUtils.decode(this.multibase));
+  public decode(): PublicKeyBytes {
+    return PublicKeyUtils.decode(this.multibase);
   }
 
   /** @see IPublicKey.hex */
@@ -98,7 +98,7 @@ export class PublicKey implements IPublicKey {
  * @type {PublicKeyUtils}
  * @implements {IPublicKey}
  */
-export class PublicKeyUtils extends PublicKey {
+export class PublicKeyUtils {
   /**
    * Computes a private key's public key in compressed even-parity-only format.
    * @static
@@ -121,12 +121,16 @@ export class PublicKeyUtils extends PublicKey {
    * @returns {PublicKeyBytes} Uint8Array of 32 random bytes.
    */
   public static random(compressed?: boolean): PublicKeyBytes {
-    const randomPrivKeyBytes = PrivateKey.random();
-    const randomPubKeyBytes = tinysecp.pointFromScalar(randomPrivKeyBytes, compressed ?? true);
-    if (!randomPubKeyBytes) {
-      throw new PublicKeyError('Failed to generate random public key', 'RANDOM_PUBLIC_KEY_FAILED');
+    // Generate random private key bytes
+    const privateKeyBytes = PrivateKeyUtils.random();
+    // Generate public key bytes from private key bytes
+    const publicKeyBytes = tinysecp.pointFromScalar(privateKeyBytes, compressed ?? true);
+    // If no public key bytes, throw error
+    if (!publicKeyBytes) {
+      throw new PublicKeyError('Missing public key: failed to generate public key', 'RANDOM_PUBLIC_KEY_FAILED');
     }
-    return randomPubKeyBytes;
+    // Return the public key bytes
+    return publicKeyBytes;
   }
 
   /**
@@ -135,7 +139,9 @@ export class PublicKeyUtils extends PublicKey {
    * @returns {PublicKey} A new PublicKey object
    */
   public static generate(): PublicKey {
+    // Generate random public key bytes
     const publicKeyBytes = this.random();
+    // Return a new PublicKey object
     return new PublicKey(publicKeyBytes);
   }
 

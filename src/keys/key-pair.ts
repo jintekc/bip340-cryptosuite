@@ -1,7 +1,7 @@
 import { PrivateKeyBytes } from '../types/shared.js';
 import { KeyPairError } from '../utils/error.js';
 import { IKeyPair } from './interface.js';
-import { PrivateKey } from './private-key.js';
+import { PrivateKey, PrivateKeyUtils } from './private-key.js';
 import { PublicKey } from './public-key.js';
 
 /** Params for the {@link KeyPair} constructor */
@@ -81,8 +81,9 @@ export class KeyPair implements IKeyPair {
    * @returns {KeyPair} A new KeyPair object
    */
   public static generate(): KeyPair {
+    const privateKeyByte = PrivateKeyUtils.random();
     // Generate a new random private key
-    const privateKey = new PrivateKey(PrivateKey.random());
+    const privateKey = new PrivateKey(privateKeyByte);
     // Derive the public key from the private key
     const publicKey = privateKey.computePublicKey();
     // Return a randomly generated KeyPair

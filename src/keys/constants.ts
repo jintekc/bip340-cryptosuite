@@ -11,11 +11,17 @@ export const Gx = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f8
 // base point y
 export const Gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8n;
 
+export const a = BigInt(0n);
+
+export const b = BigInt(7n);
+export const p = BigInt(P);
+export const n = BigInt(N);
+
 export const CURVE = {
-  p : P,
-  n : N,
-  a : 0n,
-  b : 7n,
+  p,
+  n,
+  a,
+  b,
   Gx,
   Gy
 };

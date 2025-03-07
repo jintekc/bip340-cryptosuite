@@ -2,13 +2,13 @@ import { schnorr } from '@noble/curves/secp256k1';
 import { DidVerificationMethod } from '@web5/dids';
 import { randomBytes } from 'crypto';
 import { base58btc } from 'multiformats/bases/base58';
+import { SECP256K1_XONLY_PREFIX } from '../../keys/constants.js';
 import { KeyPair } from '../../keys/key-pair.js';
 import { PrivateKey } from '../../keys/private-key.js';
 import { PublicKey } from '../../keys/public-key.js';
 import { Hex, SignatureBytes } from '../../types/shared.js';
 import { MultikeyError } from '../../utils/error.js';
 import { FromPrivateKey, FromPublicKey, IMultikey, MultikeyParams } from './interface.js';
-import { SECP256K1_XONLY_PREFIX } from '../../keys/constants.js';
 
 /**
  * Implements section
@@ -148,7 +148,7 @@ export class Multikey implements IMultikey {
 
     // Decode the public key multibase
     const publicKeyMultibaseBytes = base58btc.decode(publicKeyMultibase);
-    console.log('publicKeyMultibaseBytes', publicKeyMultibaseBytes);
+
     // Check if the prefix is correct
     const prefix = publicKeyMultibaseBytes.slice(0, SECP256K1_XONLY_PREFIX.length);
     if (!prefix.every((b, i) => b === SECP256K1_XONLY_PREFIX[i])) {
@@ -173,7 +173,15 @@ export class Multikey implements IMultikey {
   get isSigner(): boolean {
     return !!this.keyPair.privateKey;
   }
+}
 
+/**
+ * A utility class for creating `Multikey` instances
+ * @export
+ * @class MultikeyUtils
+ * @type {MultikeyUtils}
+ */
+export class MultikeyUtils {
   /**
    * Creates a `Multikey` instance from a private key
    * @public @static

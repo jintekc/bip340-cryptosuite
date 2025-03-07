@@ -80,9 +80,9 @@ export interface IPublicKey {
 
   /**
    * Decode the base58btc multibase string to the compressed public key prefixed with 0x02
-   * @returns {PublicKey} A new PublicKey object
+   * @returns {PublicKeyBytes} The public key as a 33-byte compressed public key with header.
    */
-  decode(): PublicKey;
+  decode(): PublicKeyBytes;
 
   /**
    * Encode the PublicKey as an x-only base58btc multibase public key

@@ -20,7 +20,7 @@ import {
   SecureDocument,
   VerificationResult
 } from '../../types/di-proof.js';
-import { HashBytes, ProofBytes } from '../../types/shared.js';
+import { HashBytes, SignatureBytes } from '../../types/shared.js';
 import { CryptosuiteError } from '../../utils/error.js';
 import { Multikey } from '../multikey/index.js';
 import { ICryptosuite } from './interface.js';
@@ -214,7 +214,7 @@ export class Cryptosuite implements ICryptosuite {
   }
 
   /** @see ICryptosuite.proofSerialization */
-  public proofSerialization({ hash, options }: SerializeParams): ProofBytes {
+  public proofSerialization({ hash, options }: SerializeParams): SignatureBytes {
     // Error type for the proofSerialization method
     const ERROR_TYPE = 'PROOF_SERIALIZATION_ERROR';
     // Get the verification method from the options
@@ -242,7 +242,7 @@ export class Cryptosuite implements ICryptosuite {
       throw new CryptosuiteError(`Mismatch on "fullId" in options and multikey: ${fullId} !== ${vm}`, ERROR_TYPE);
     }
     // Return the verified hashData and signedProof
-    return this.multikey.verify(hash, signature);
+    return this.multikey.verify(signature, hash);
   }
 
 }

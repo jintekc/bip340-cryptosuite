@@ -2,6 +2,7 @@ import { getRandomValues } from 'crypto';
 import * as tinysecp from 'tiny-secp256k1';
 import { Hex, PrivateKeyBytes } from '../types/shared.js';
 import { PrivateKeyError } from '../utils/error.js';
+import { CURVE } from './constants.js';
 import { IPrivateKey } from './interface.js';
 import { PublicKey } from './public-key.js';
 
@@ -15,6 +16,9 @@ import { PublicKey } from './public-key.js';
  * @implements {IPrivateKey}
  */
 export class PrivateKey implements IPrivateKey {
+  /** @type {PrivateKeyUtils} The Uint8Array private key */
+  public utils: PrivateKeyUtils = new PrivateKeyUtils();
+
   /** @type {PrivateKeyBytes} The Uint8Array private key */
   private _bytes: PrivateKeyBytes;
 
@@ -55,11 +59,12 @@ export class PrivateKey implements IPrivateKey {
     if (!tinysecp.isPrivate(bytes)) {
       throw new PrivateKeyError(
         'Invalid private key: secret out of valid range',
-        'PRIVATE_KEY_SET_ERROR'
+        'SET_PRIVATE_KEY_ERROR'
       );
     }
 
-    this._bytes = bytes;
+    // Set the private key bytes
+    this._bytes = new Uint8Array(bytes);
   }
 
   /** @see IPrivateKey.raw */
@@ -68,7 +73,7 @@ export class PrivateKey implements IPrivateKey {
     if (!this._bytes) {
       throw new PrivateKeyError(
         'Missing variable: private key not set',
-        'RAW_PRIVATE_KEY_ERROR'
+        'GET_RAW_PRIVATE_KEY_ERROR'
       );
     }
     // Return a copy of the private key bytes
@@ -79,26 +84,31 @@ export class PrivateKey implements IPrivateKey {
    * Return the raw private key as a bigint secret.
    * @see IPrivateKey.secret
    */
-  get secret(): BigInt {
+  get secret(): bigint {
     // Convert private key bytes to a bigint
     return this.raw.reduce(
-      (acc, byte) => (acc << BigInt(8)) | BigInt(byte),
-      BigInt(0)
+      (acc, byte) => (acc << 8n) | BigInt(byte), 0n
     );
   }
 
   /** @see IPrivateKey.point */
-  get point(): BigInt {
+  get point(): bigint {
     // Multiply the generator point by the private key
     const publicKey = tinysecp.pointFromScalar(this.raw, true);
     // If no public key, throw error
     if (!publicKey) {
-      throw new PrivateKeyError('Undefined publicKey: failed to compute public key', 'PRIVATE_KEY_POINT_ERROR');
+      throw new PrivateKeyError(
+        'Undefined publicKey: failed to compute public key',
+        'PRIVATE_KEY_POINT_ERROR'
+      );
     }
 
     // If length is incorrect, throw error
     if (!tinysecp.isPointCompressed(publicKey)) {
-      throw new PrivateKeyError('Malformed publicKey: public key not compressed format', 'PRIVATE_KEY_POINT_ERROR');
+      throw new PrivateKeyError(
+        'Malformed publicKey: public key not compressed format',
+        'PRIVATE_KEY_POINT_ERROR'
+      );
     }
 
     // Extract the x-coordinate from the compressed public key (bytes 1-33).
@@ -125,42 +135,39 @@ export class PrivateKey implements IPrivateKey {
 
   /** @see IPrivateKey.computePublicKey */
   public computePublicKey(): PublicKey {
-    let publicKeyBytes = tinysecp.pointFromScalar(this.raw, true);
+    // Derive the public key from the private key
+    const publicKeyBytes = tinysecp.pointFromScalar(this.raw, true);
 
+    // If no public key, throw error
     if (!publicKeyBytes) {
       throw new PrivateKeyError(
         'Invalid response: failed to derive public key',
-        'PRIVATE_KEY_DERIVE_PUBLIC_KEY_ERROR'
+        'COMPUTE_PUBLIC_KEY_ERROR'
       );
     }
 
-    // If we already have even parity, great.
-    if (publicKeyBytes[0] === 0x02) {
-      return new PublicKey(publicKeyBytes);
-    }
-
-    // Otherwise, flip this private key to n - secret
-    const flipped = CURVE.n - this.secret;
-    this.secret = flipped;
-
-    // Derive again
-    publicKeyBytes = tinysecp.pointFromScalar(this.raw, true);
-    if (!publicKeyBytes || publicKeyBytes[0] !== 0x02) {
+    // If public key is not compressed, throw error
+    if(publicKeyBytes.length !== 33) {
       throw new PrivateKeyError(
-        'Failed to produce even-parity public key after flipping',
-        'PRIVATE_KEY_PARITY_ERROR'
+        'Invalid response: public key not compressed format',
+        'COMPUTE_PUBLIC_KEY_ERROR'
       );
     }
 
-    return new PublicKey(publicKeyBytes);  }
+    const finalPublicKeyBytes = publicKeyBytes[0] === 0x03
+      ? this.utils.lift_x(publicKeyBytes.slice(1, 33))
+      : publicKeyBytes;
+
+    return new PublicKey(finalPublicKeyBytes);
+  }
 
   /**
    * Create a new PrivateKey object from a bigint secret.
    * @static
-   * @param {BigInt} secret The secret bigint
+   * @param {bigint} secret The secret bigint
    * @returns {PrivateKey} A new PrivateKey object
    */
-  public static fromSecret(secret: BigInt): PrivateKey {
+  public static fromSecret(secret: bigint): PrivateKey {
     // Convert the secret bigint to a hex string
     const hexsecret = secret.toString(16).padStart(64, '0');
     // Convert the hex string to a Uint8Array
@@ -168,6 +175,16 @@ export class PrivateKey implements IPrivateKey {
     // Return a new PrivateKey object
     return new PrivateKey(privateKeyBytes);
   }
+}
+
+/**
+ * Static methods for creating and working with PrivateKey objects.
+ * @export
+ * @class PrivateKeyUtils
+ * @type {PrivateKeyUtils}
+ * @extends {PrivateKey}
+ */
+export class PrivateKeyUtils {
 
   /**
    * Static method to generate a new PrivateKey from random bytes.
@@ -175,7 +192,11 @@ export class PrivateKey implements IPrivateKey {
    * @returns {PrivateKey} A new PrivateKey object.
    */
   public static generate(): PrivateKey {
-    return new PrivateKey(this.random());
+    // Generate random private key bytes
+    const privateKeyBytes = this.random();
+
+    // Return a new PrivateKey object
+    return new PrivateKey(privateKeyBytes);
   }
 
   /**
@@ -184,6 +205,60 @@ export class PrivateKey implements IPrivateKey {
    * @returns {PrivateKeyBytes} Uint8Array of 32 random bytes.
    */
   public static random(): PrivateKeyBytes {
-    return getRandomValues(new Uint8Array(32));
+    // Generate empty 32-byte array
+    const byteArray = new Uint8Array(32);
+    // Use the getRandomValues function to fill the byteArray with random values
+    return getRandomValues(byteArray);
   }
+
+
+  /**
+ * Computes modular exponentiation: (base^exp) % mod.
+ * Used for computing modular square roots.
+ */
+  public static modPow(base: bigint, exp: bigint, mod: bigint): bigint {
+    let result = 1n;
+    while (exp > 0n) {
+      if (exp & 1n) result = (result * base) % mod;
+      base = (base * base) % mod;
+      exp >>= 1n;
+    }
+    return result;
+  };
+
+  /**
+ * Computes `sqrt(a) mod p` using Tonelli-Shanks algorithm.
+ * This finds `y` such that `y^2 ≡ a mod p`.
+ */
+  public static sqrtMod(a: bigint, p: bigint): bigint {
+    return this.modPow(a, (p + 1n) >> 2n, p);
+  };
+
+  /**
+ * Lifts a 32-byte x-only coordinate into a full secp256k1 point (x, y).
+ * Does **not** enforce even parity.
+ *
+ * @param xBytes 32-byte x-coordinate
+ * @returns 65-byte uncompressed public key (starts with `0x04`)
+ */
+  public lift_x(xBytes: Uint8Array): Uint8Array {
+    if (xBytes.length !== 32) throw new Error('Invalid x-coordinate length');
+
+    // Convert x from Uint8Array → BigInt
+    const x = BigInt('0x' + Buffer.from(xBytes).toString('hex'));
+    if (x <= 0n || x >= CURVE.p) throw new Error('x out of range');
+
+    // Compute y² = x³ + 7 mod p
+    const ySquared = BigInt((x ** 3n + CURVE.b) % CURVE.p);
+
+    // Compute y (do not enforce parity)
+    const y = PrivateKeyUtils.sqrtMod(ySquared, CURVE.p);
+
+    // Convert x and y to Uint8Array
+    const yBytes = Buffer.from(y.toString(16).padStart(64, '0'), 'hex');
+
+    // Return 65-byte uncompressed public key: `0x04 || x || y`
+    return Buffer.concat([Buffer.from([0x04]), Buffer.from(xBytes), yBytes]);
+  };
 }
+
