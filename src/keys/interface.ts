@@ -49,6 +49,37 @@ export interface IPrivateKey {
    * @returns {Hex} The private key as a hex string
    */
   hex(): Hex;
+
+  /**
+   * Converts a Uint8Array private key bytes to a bigint secret.
+   * @public
+   * @param {PrivateKeyBytes} bytes
+   * @returns {bigint}
+   */
+  toSecret(bytes: PrivateKeyBytes): bigint;
+
+  /**
+   * Converts a bigint secret to a Uint8Array private key bytes.
+   * @public
+   * @param {bigint} secret
+   * @returns {PrivateKeyBytes}
+   */
+  toBytes(secret: bigint): PrivateKeyBytes;
+
+
+  /**
+   * Generates new PrivateKey from random bytes.
+   * @returns {PrivateKey}
+   * @see PrivateKeyUtils.generate
+   */
+  generate(): PrivateKey
+
+  /**
+   * Generates new random private key bytes.
+   * @returns {PrivateKeyBytes}
+   * @see PrivateKeyUtils.random
+   */
+  random(): PrivateKeyBytes
 }
 
 
@@ -102,16 +133,16 @@ export interface IPublicKey {
   multibase: string;
 
   /**
-   * Decode the base58btc multibase string to the compressed public key prefixed with 0x02
-   * @returns {PublicKeyMultibaseBytes} The public key as a 33-byte compressed public key with header.
+   * Decode the public key from multibase format to the compressed x-coordinate public key.
+   * @returns {PublicKeyMultibaseBytes} The decoded public key bytes (34 bytes = 2 bytes header + 32 byte x-coordinate).
    */
-  decode(): PublicKeyMultibaseBytes;
+  decodeMultibase(): PublicKeyMultibaseBytes;
 
   /**
-   * Encode the PublicKey as an x-only base58btc multibase public key
-   * @returns {string} The public key formatted a base58btc multibase string
+   * Encode the PublicKey bytes to bip340 multibase format (34 bytes = 2 bytes header + 32 byte x-coordinate).
+   * @returns {string} The public key x-coord bytes prefixed with bip340 header base58btc encoded.
    */
-  encode(): string;
+  encodeMultibase(): string;
 
   /**
    * Public key hex getter.
@@ -125,6 +156,13 @@ export interface IPublicKey {
    * @returns {boolean} True if the public keys are equal.
    */
   equals(other: PublicKey): boolean;
+
+
+  /**
+   * Public key json representation.
+   * @returns {object} The public key as a json object.
+   */
+  json(): object;
 }
 
 /**
@@ -134,13 +172,60 @@ export interface IPublicKey {
  * @type {IKeyPair}
  */
 export interface IKeyPair {
-  /** @readonly @type {PublicKey} Get/set the public key associated with the key pair (required) */
+  /**
+   * Get/set the public key associated with the key pair (required).
+   * @readonly
+   * @type {PublicKey} The public key associated with the key pair (required).
+   */
   readonly publicKey: PublicKey;
 
   /**
+   * Get the private key associated with this key pair (optional).
    * @readonly
    * @type {PrivateKey} The private key associated with this key pair (optional)
    * @throws {KeyPairError} If the private key is not available
    */
   readonly privateKey?: PrivateKey;
+
+
+  /**
+   * Returns the key pair as a MultibaseKey object.
+   * @returns {MultibaseKeyPair} The key pair as a MultibaseKey object.
+   */
+  multibase(): MultibaseKeyPair;
+}
+
+
+/** Params for the {@link KeyPair} constructor */
+export interface KeyPairParams {
+  privateKey?: PrivateKey | null;
+  publicKey?: PublicKey | null;
+}
+
+/**
+ * Interface for the MultibaseKeyPair class.
+ * @export
+ * @interface IMultibaseKeyPair
+ * @type {IMultibaseKeyPair}
+ */
+export interface IMultibaseKeyPair {
+  publicKey: object;
+  privateKey: object;
+}
+
+/**
+ * Object class representatopm of a MultibaseKeyPair.
+ * @export
+ * @class MultibaseKeyPair
+ * @type {MultibaseKeyPair}
+ * @implements {IMultibaseKeyPair}
+ */
+export class MultibaseKeyPair implements IMultibaseKeyPair {
+  public publicKey: object;
+  public privateKey: object;
+
+  constructor({ publicKey, privateKey }: IMultibaseKeyPair) {
+    this.publicKey = publicKey;
+    this.privateKey = privateKey;
+  }
 }

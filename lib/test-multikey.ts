@@ -1,4 +1,4 @@
-import { KeyPair } from '../src/keys/key-pair.js';
+import { KeyPairUtils } from '../src/keys/key-pair.js';
 import { Multikey } from '../src/di-bip340/multikey/index.js';
 // Crypto Constants
 const privateKeyBytes = new Uint8Array([
@@ -14,7 +14,7 @@ const privateKeyBytes = new Uint8Array([
   156,  26, 118, 240,  76, 102,  53,  38,
   239
 ]);*/
-const keyPair = KeyPair.fromPrivateKey(privateKeyBytes);
+const keyPair = KeyPairUtils.fromPrivateKey(privateKeyBytes);
 // const { publicKey, privateKey } = keyPair;
 
 // Multikey Constants
@@ -53,7 +53,7 @@ console.log('verify', verify);
 const encoded = multikey.publicKey.multibase;
 console.log('encoded', encoded);
 
-let decoded = multikey.publicKey.decode();
+let decoded = multikey.publicKey.decodeMultibase();
 console.log('decoded', decoded);
 
 const prefix = decoded.subarray(0, 2);

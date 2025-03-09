@@ -72,21 +72,20 @@ export class PublicKey implements IPublicKey {
 
   /** @see IPublicKey.multibase */
   get multibase(): string {
-    return this.encode();
+    return this.encodeMultibase();
   }
 
   /** @see IPublicKey.prefix */
   get prefix(): PrefixBytes {
-    return this.decode();
+    return this.decodeMultibase().subarray(0, 2);
   }
-
 
   /**
    * Decodes the multibase string to the 34-byte corresponding public key (2 byte prefix + 32 byte public key).
    * @static
    * @returns {PublicKeyMultibaseBytes} The decoded public key: prefix and public key bytes
    */
-  public decode(): PublicKeyMultibaseBytes {
+  public decodeMultibase(): PublicKeyMultibaseBytes {
     // Decode the public key multibase string
     const multibase = base58btc.decode(this.multibase);
 
@@ -110,11 +109,11 @@ export class PublicKey implements IPublicKey {
   }
 
   /**
-   * Encodes compressed secp256k1 public key from bytes to BIP340 base58btc multibase format
+   * Encode the PublicKey bytes to bip340 multibase format (34 bytes = 2 bytes header + 32 byte x-coordinate).
    * @static
-   * @returns {string} The public key encoded in base-58-btc multibase format
+   * @returns {string} The public key x-coord bytes prefixed with bip340 header base58btc encoded.
    */
-  public encode(): string {
+  public encodeMultibase(): string {
     // Create a local copy of the public key x-coordinate to avoid mutation
     const xCoordinate = this.x;
 
@@ -130,15 +129,53 @@ export class PublicKey implements IPublicKey {
     return base58btc.encode(multikeyBytes);
   }
 
-  /** @see IPublicKey.hex */
+  /**
+   * Public key hex getter.
+   * @returns {Hex} The public key as a hex string.
+   */
   public hex(): Hex {
     return Buffer.from(this.compressed).toString('hex');
   }
 
-  /** @see IPublicKey.equals */
+  /**
+   * Public key equality check. Checks if `this` public key is equal to `other` public key.
+   * @param {PublicKey} other The public key to compare.
+   * @returns {boolean} True if the public keys are equal.
+   */
   public equals(other: PublicKey): boolean {
     return this.hex() === other.hex();
   }
+
+  /**
+   * Public key JSON representation.
+   * @returns {object} The public key as a JSON object.
+   */
+  public json(): object {
+    return {
+      parity    : this.parity,
+      x         : this.x,
+      y         : this.y,
+      multibase : this.multibase,
+      prefix    : this.prefix,
+    };
+  }
+
+  /**
+   * Generates a new PublicKey from random public key bytes.
+   * @see IPublicKey.generate
+   */
+  public generate(): PublicKey {
+    return PublicKeyUtils.generate();
+  }
+
+  /**
+   * Generates new random public key bytes.
+   * @see IPublicKey.random
+   */
+  public random(): PublicKeyBytes {
+    return PublicKeyUtils.random();
+  }
+
 }
 
 /**

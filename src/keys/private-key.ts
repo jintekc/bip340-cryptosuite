@@ -64,35 +64,19 @@ export class PrivateKey implements IPrivateKey {
     this._secret = seed as PrivateKeySecret ?? this.toSecret(seed as PrivateKeyBytes);
   }
 
-  public toSecret(bytes: PrivateKeyBytes): bigint {
-    return bytes.reduce((acc, byte) => (acc << 8n) | BigInt(byte), 0n);
-  }
-
-  public toBytes(secret: bigint): PrivateKeyBytes {
-    // Ensure it’s a valid 32-byte value in [1, n-1] and convert bigint to Uint8Array
-    const bytes = Uint8Array.from(
-      { length: 32 },
-      (_, i) => Number(secret >> BigInt(8 * (31 - i)) & BigInt(0xff))
-    );
-
-    // If bytes are not a valid secp256k1 private key, throw error
-    if (!tinysecp.isPrivate(bytes)) {
-      throw new PrivateKeyError(
-        'Invalid private key: secret out of valid range',
-        'SET_PRIVATE_KEY_ERROR'
-      );
-    }
-    return new Uint8Array(bytes);;
-  }
-
-  /** @see IPrivateKey.secret */
+  /**
+   * Getter/setter for the private key secret and bytes.
+   * @see IPrivateKey.secret
   set secret(secret: bigint) {
     // Set the private key bytes
-    this.secret = secret;
+    this._secret = secret;
     this._bytes = this.toBytes(secret);
-  }
+  }*/
 
-  /** @see IPrivateKey.bytes */
+  /**
+   * Get the private key bytes.
+   * @see IPrivateKey.bytes
+   */
   get bytes(): Uint8Array {
     // If no private key bytes, throw an error
     if (!this._bytes) {
@@ -116,7 +100,10 @@ export class PrivateKey implements IPrivateKey {
     );
   }
 
-  /** @see IPrivateKey.point */
+  /**
+   * Get the private key point.
+   * @see IPrivateKey.point
+   */
   get point(): bigint {
     // Multiply the generator point by the private key
     const publicKey = tinysecp.pointFromScalar(this.bytes, true);
@@ -159,19 +146,71 @@ export class PrivateKey implements IPrivateKey {
     return this.hex() === other.hex();
   }
 
-  /** @see IPrivateKey.computePublicKey */
+  /**
+   * Uses the private key to compute the corresponding public key.
+   * @see IPrivateKey.computePublicKey
+   */
   public computePublicKey(): PublicKey {
     return this.utils.computePublicKey(this.bytes);
   }
 
-  /** @see PrivateKeyUtils.generate */
-  public static generate() {
+  /**
+   * Converts a Uint8Array private key bytes to a bigint secret.
+   * @see IPrivateKey.toSecret
+   */
+  public toSecret(bytes: PrivateKeyBytes): bigint {
+    return bytes.reduce((acc, byte) => (acc << 8n) | BigInt(byte), 0n);
+  }
+
+  /**
+   * Converts a bigint secret to a Uint8Array private key bytes.
+   * @see IPrivateKey.toBytes
+   */
+  public toBytes(secret: bigint): PrivateKeyBytes {
+    // Ensure it’s a valid 32-byte value in [1, n-1] and convert bigint to Uint8Array
+    const bytes = Uint8Array.from(
+      { length: 32 },
+      (_, i) => Number(secret >> BigInt(8 * (31 - i)) & BigInt(0xff))
+    );
+
+    // If bytes are not a valid secp256k1 private key, throw error
+    if (!tinysecp.isPrivate(bytes)) {
+      throw new PrivateKeyError(
+        'Invalid private key: secret out of valid range',
+        'SET_PRIVATE_KEY_ERROR'
+      );
+    }
+    return new Uint8Array(bytes);;
+  }
+
+  /**
+   * Generates a new PrivateKey from random bytes.
+   * @see IPrivateKey.generate
+   */
+  public generate(): PrivateKey {
     return PrivateKeyUtils.generate();
   }
 
-  /** @see PrivateKeyUtils.random */
-  public static random() {
+  /**
+   * Generates new random private key bytes.
+   * @see IPrivateKey.random
+   */
+  public random(): PrivateKeyBytes {
     return PrivateKeyUtils.random();
+  }
+
+
+  /**
+   * Returns the private key as a JSON object.
+   * @see IPrivateKey.json
+   */
+  public json(): object {
+    return {
+      bytes  : this.bytes,
+      secret : this.secret,
+      point  : this.point,
+      hex    : this.hex(),
+    };
   }
 }
 

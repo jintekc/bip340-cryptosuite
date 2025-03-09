@@ -26,10 +26,10 @@ import { Canonicalize } from './canonicalize.js';
 
 /**
  * TODO: Test RDFC and figure out what the contexts should be
- * Implements sections
+ * Implements
  * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#schnorr-secp256k1-rdfc-2025 | 3.2 schnorr-secp256k1-rdfc-2025}
- * and {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#schnorr-secp256k1-jcs-2025 | 3.3 schnorr-secp256k1-jcs-2025}
- * of {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity Schnorr secp256k1 Cryptosuite v0.1}
+ * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#schnorr-secp256k1-jcs-2025 | 3.3 schnorr-secp256k1-jcs-2025}
+ *
  * @export
  * @class Cryptosuite
  * @type {Cryptosuite}

@@ -1,14 +1,8 @@
 import { PrivateKeyBytes } from '../types/shared.js';
 import { KeyPairError } from '../utils/error.js';
-import { IKeyPair } from './interface.js';
-import { PrivateKey } from './private-key.js';
+import { IKeyPair, KeyPairParams, MultibaseKeyPair } from './interface.js';
+import { PrivateKey, PrivateKeyUtils } from './private-key.js';
 import { PublicKey } from './public-key.js';
-
-/** Params for the {@link KeyPair} constructor */
-interface KeyPairParams {
-  privateKey?: PrivateKey | null;
-  publicKey?: PublicKey | null;
-}
 
 /**
  * Encapsulates a PublicKey and a PrivateKey object as a single KeyPair object.
@@ -18,6 +12,9 @@ interface KeyPairParams {
  * @implements {IKeyPair}
  */
 export class KeyPair implements IKeyPair {
+  /** @type {KeyPairUtils} The private key object */
+  public utils: KeyPairUtils = new KeyPairUtils();
+
   /** @type {PrivateKey} The private key object */
   private _privateKey: PrivateKey | null = null;
 
@@ -40,24 +37,43 @@ export class KeyPair implements IKeyPair {
     this._publicKey = publicKey as PublicKey ?? privateKey?.computePublicKey();
   }
 
-  /** @see IKeyPair.publicKey */
+  /**
+   * Set the public key associated with the key pair.
+   * @see IKeyPair.publicKey
+   */
   set publicKey(publicKey: PublicKey) {
     this._publicKey = publicKey;
   }
 
-  /** @see IKeyPair.publicKey */
+  /**
+   * Get the public key associated with the key pair.
+   * @see IKeyPair.publicKey
+   */
   get publicKey(): PublicKey {
     const publicKey = this._publicKey;
     return publicKey;
   }
 
-  /** @see IKeyPair.privateKey */
+  /**
+   * Get the private key associated with this key pair.
+   * @see IKeyPair.privateKey
+   */
   get privateKey(): PrivateKey {
     if(!this._privateKey) {
       throw new KeyPairError('Private key not available', 'PRIVATE_KEY_ERROR');
     }
     const privateKey = this._privateKey;
     return privateKey;
+  }
+
+  /**
+   * Returns the key pair as a MultibaseKey object.
+   * @see IKeyPair.multibase
+   */
+  public multibase(): MultibaseKeyPair {
+    const publicKey = this.publicKey.json();
+    const privateKey = this.privateKey.json();
+    return { publicKey, privateKey } as MultibaseKeyPair;
   }
 }
 
@@ -100,10 +116,12 @@ export class KeyPairUtils {
    * @returns {KeyPair} A new KeyPair object
    */
   public static generate(): KeyPair {
-    const privateKey = PrivateKey.generate();
+    const privateKey = PrivateKeyUtils.generate();
     // Derive the public key from the private key
     const publicKey = privateKey.computePublicKey();
     // Return a randomly generated KeyPair
     return new KeyPair({ privateKey, publicKey });
   }
 }
+
+export const utils = new KeyPairUtils();

@@ -9,9 +9,9 @@ import { MultikeyError } from '../../utils/error.js';
 import { FromPrivateKey, FromPublicKey, IMultikey, MultikeyParams } from './interface.js';
 
 /**
- * Implements section
- * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#multikey | 2.1.1 Multikey} of the
- * {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity Bip340 Cryptosuite} spec
+ * Implements {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#multikey | 2.1.1 Multikey}
+ * A Multikey is a secp256k1 compressed keypair that creates and verifies schnorr signatures.
+ * The publicKeyMultibase is the Multikey public key encoded using base58btc algorithm with `z` identifier character.
  * @export
  * @class Multikey
  * @type {Multikey}
@@ -145,7 +145,7 @@ export class Multikey implements IMultikey {
     }
 
     // Decode the public key multibase
-    const multibase = this.publicKey.decode();
+    const multibase = this.publicKey.decodeMultibase();
 
     // Get the 32 byte public key from the multibase
     const publicKey = multibase.slice(2, multibase.length);
@@ -177,12 +177,19 @@ export class MultikeyUtils {
    * @param {FromPublicKey} params The parameters to create the multikey
    * @param {string} params.id The id of the multikey
    * @param {string} params.controller The controller of the multikey
-   * @param {PrivateKeyBytes} params.privateKey The private key bytes for the multikey
+   * @param {PrivateKeyBytes} params.privateKeyBytes The private key bytes for the multikey
    * @returns {Multikey} The new multikey instance
    */
-  public static fromPrivateKey({ id, controller, privateKey }: FromPrivateKey): Multikey {
+  public static fromPrivateKey({ id, controller, privateKeyBytes }: FromPrivateKey): Multikey {
+    // Create a new PrivateKey from the private key bytes
+    const privateKey = new PrivateKey(privateKeyBytes);
+
+    // Compute the public key from the private key
+    const publicKey = privateKey.computePublicKey();
+
     // Create a new KeyPair from the private key
-    const keyPair = KeyPairUtils.fromPrivateKey(privateKey);
+    const keyPair = new KeyPair({ publicKey, privateKey });
+
     // Return a new Multikey instance
     return new Multikey({ id, controller, keyPair });
   }
@@ -193,11 +200,14 @@ export class MultikeyUtils {
    * @param {FromPublicKey} params The parameters to create the multikey
    * @param {string} params.id The id of the multikey
    * @param {string} params.controller The controller of the multikey
-   * @param {PublicKeyBytes} params.publicKey The public key bytes for the multikey
+   * @param {PublicKeyBytes} params.publicKeyBytes The public key bytes for the multikey
    * @returns {Multikey} The new multikey instance
    */
-  public static fromPublicKey({ id, controller, publicKey }: FromPublicKey): Multikey {
-    const keyPair = new KeyPair({ publicKey: new PublicKey(publicKey) });
+  public static fromPublicKey({ id, controller, publicKeyBytes }: FromPublicKey): Multikey {
+    // Create a new PublicKey from the public key bytes
+    const keyPair = new KeyPair({ publicKey: new PublicKey(publicKeyBytes) });
+
+    // Return a new Multikey instance
     return new Multikey({ id, controller, keyPair });
   }
 }

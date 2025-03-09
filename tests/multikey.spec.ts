@@ -105,7 +105,7 @@ describe('Multikey instantiated', () => {
     });
 
     it('should decode publicKeyMultibase from Multikey Format to bytes', () => {
-      expect(multikey.publicKey.encode()).to.equal(publicKeyMultibase);
+      expect(multikey.publicKey.encodeMultibase()).to.equal(publicKeyMultibase);
     });
 
     it('should have a matching full id', () => {
@@ -161,11 +161,11 @@ describe('Multikey instantiated', () => {
     });
 
     it('should encode publicKey from bytes to Multikey Format', () => {
-      expect(multikey.publicKey.encode()).to.equal(publicKeyMultibase);
+      expect(multikey.publicKey.encodeMultibase()).to.equal(publicKeyMultibase);
     });
 
     it('should decode publicKeyMultibase from Multikey Format to bytes', () => {
-      expect(multikey.publicKey.decode()).to.be.instanceOf(Uint8Array);
+      expect(multikey.publicKey.decodeMultibase()).to.be.instanceOf(Uint8Array);
     });
 
     it('should have a matching full id', () => {
@@ -221,11 +221,11 @@ describe('Multikey instantiated', () => {
     });
 
     it('should encode publicKey from bytes to Multikey Format', () => {
-      expect(multikey.publicKey.encode()).to.equal(publicKeyMultibase);
+      expect(multikey.publicKey.encodeMultibase()).to.equal(publicKeyMultibase);
     });
 
     it('should decode publicKeyMultibase from Multikey Format to public key bytes', () => {
-      expect(multikey.publicKey.decode()).to.be.instanceOf(Uint8Array);
+      expect(multikey.publicKey.decodeMultibase()).to.be.instanceOf(Uint8Array);
     });
 
     it('should have a matching full id', () => {
@@ -284,11 +284,11 @@ describe('Multikey instantiated', () => {
     });
 
     it('should encode publicKey from bytes to Multikey Format', () => {
-      expect(multikey.publicKey.encode()).to.equal(publicKeyMultibase);
+      expect(multikey.publicKey.encodeMultibase()).to.equal(publicKeyMultibase);
     });
 
     it('should decode publicKeyMultibase from Multikey Format to public key bytes', () => {
-      expect(multikey.publicKey.decode()).to.be.instanceOf(Uint8Array);
+      expect(multikey.publicKey.decodeMultibase()).to.be.instanceOf(Uint8Array);
     });
 
     it('should have a matching full id', () => {

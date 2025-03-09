@@ -10,10 +10,10 @@ export interface DidParams {
 }
 
 export interface FromPrivateKey extends DidParams {
-  privateKey: PrivateKeyBytes;
+  privateKeyBytes: PrivateKeyBytes;
 }
 export interface FromPublicKey extends DidParams {
-  publicKey: PublicKeyBytes;
+  publicKeyBytes: PublicKeyBytes;
 }
 export interface MultikeyParams extends DidParams {
   keyPair?: KeyPair;
