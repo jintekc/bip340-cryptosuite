@@ -14,6 +14,9 @@ export type ProofBytes = Bytes;
 export type HashBytes = Bytes;
 export type MessageBytes = Bytes;
 
+export type PrivateKeySecret = bigint;
+export type PrivateKeyPoint = bigint;
+
 export type CompressedPublicKeyParityByte = 0x02 | 0x03;
 
 export type Base58BtcPrefix = 'z';

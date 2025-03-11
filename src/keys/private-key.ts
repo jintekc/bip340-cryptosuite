@@ -1,12 +1,10 @@
 import { getRandomValues } from 'crypto';
 import * as tinysecp from 'tiny-secp256k1';
-import { Hex, PrivateKeyBytes } from '../types/shared.js';
+import { Hex, PrivateKeyBytes, PrivateKeyPoint, PrivateKeySecret } from '../types/shared.js';
 import { PrivateKeyError } from '../utils/error.js';
-import { IPrivateKey } from './interface.js';
+import { IPrivateKey, PrivateKeyObject } from './interface.js';
 import { PublicKey } from './public-key.js';
 import { CURVE } from './constants.js';
-
-type PrivateKeySecret = bigint
 
 /**
  * Encapsulates a secp256k1 private key
@@ -25,7 +23,7 @@ export class PrivateKey implements IPrivateKey {
   private _bytes?: PrivateKeyBytes;
 
   /** @type {PrivateKeySecret} The bigint private key secret */
-  private _secret?: BigInt;
+  private _secret?: PrivateKeySecret;
 
   /**
    * Instantiates an instance of PrivateKey.
@@ -77,7 +75,7 @@ export class PrivateKey implements IPrivateKey {
    * Get the private key bytes.
    * @see IPrivateKey.bytes
    */
-  get bytes(): Uint8Array {
+  get bytes(): PrivateKeyBytes {
     // If no private key bytes, throw an error
     if (!this._bytes) {
       throw new PrivateKeyError(
@@ -93,7 +91,7 @@ export class PrivateKey implements IPrivateKey {
    * Return the raw private key as a bigint secret.
    * @see IPrivateKey.secret
    */
-  get secret(): bigint {
+  get secret(): PrivateKeySecret {
     // Convert private key bytes to a bigint
     return this.bytes.reduce(
       (acc, byte) => (acc << 8n) | BigInt(byte), 0n
@@ -104,7 +102,7 @@ export class PrivateKey implements IPrivateKey {
    * Get the private key point.
    * @see IPrivateKey.point
    */
-  get point(): bigint {
+  get point(): PrivateKeyPoint {
     // Multiply the generator point by the private key
     const publicKey = tinysecp.pointFromScalar(this.bytes, true);
 
@@ -204,7 +202,7 @@ export class PrivateKey implements IPrivateKey {
    * Returns the private key as a JSON object.
    * @see IPrivateKey.json
    */
-  public json(): object {
+  public json(): PrivateKeyObject {
     return {
       bytes  : this.bytes,
       secret : this.secret,

@@ -1,9 +1,9 @@
 import { schnorr } from '@noble/curves/secp256k1';
 import { DidVerificationMethod } from '@web5/dids';
 import { randomBytes } from 'crypto';
-import { KeyPair, KeyPairUtils } from '../../keys/key-pair.js';
+import { KeyPair } from '../../keys/key-pair.js';
 import { PrivateKey } from '../../keys/private-key.js';
-import { PublicKey, PublicKeyUtils } from '../../keys/public-key.js';
+import { PublicKey } from '../../keys/public-key.js';
 import { Hex, SignatureBytes } from '../../types/shared.js';
 import { MultikeyError } from '../../utils/error.js';
 import { FromPrivateKey, FromPublicKey, IMultikey, MultikeyParams } from './interface.js';
@@ -162,6 +162,8 @@ export class Multikey implements IMultikey {
   get isSigner(): boolean {
     return !!this.keyPair.privateKey;
   }
+
+  // TODO: Implement a json method that calls the PrivateKey and PublicKey json methods
 }
 
 /**
