@@ -1,6 +1,7 @@
+import { Multikey } from '../di-bip340/multikey/index.js';
 import { PrivateKeyBytes } from '../types/shared.js';
 import { KeyPairError } from '../utils/error.js';
-import { IKeyPair, KeyPairParams, MultibaseKeyPair } from './interface.js';
+import { IKeyPair, KeyPairParams, MultikeyPair } from './interface.js';
 import { PrivateKey, PrivateKeyUtils } from './private-key.js';
 import { PublicKey } from './public-key.js';
 
@@ -54,6 +55,10 @@ export class KeyPair implements IKeyPair {
     return publicKey;
   }
 
+  get keyPair(): KeyPair {
+    return this;
+  }
+
   /**
    * Get the private key associated with this key pair.
    * @see IKeyPair.privateKey
@@ -70,10 +75,14 @@ export class KeyPair implements IKeyPair {
    * Returns the key pair as a MultibaseKey object.
    * @see IKeyPair.multibase
    */
-  public multibase(): MultibaseKeyPair {
+  public multibase(): MultikeyPair {
     const publicKey = this.publicKey.json();
     const privateKey = this.privateKey.json();
-    return { publicKey, privateKey } as MultibaseKeyPair;
+    return { publicKey, privateKey } as MultikeyPair;
+  }
+
+  public toMultikey({ id, controller }: { id: string; controller: string }): Multikey {
+    return new Multikey({ id, controller, keyPair: this });
   }
 }
 

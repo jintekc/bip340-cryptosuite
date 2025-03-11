@@ -1,4 +1,4 @@
-import { Hex, PrefixBytes, PrivateKeyBytes, PublicKeyBytes, PublicKeyMultibaseBytes } from '../types/shared.js';
+import { Hex, PrefixBytes, PrivateKeyBytes, PrivateKeyPoint, PrivateKeySecret, PublicKeyBytes, PublicKeyMultibaseBytes } from '../types/shared.js';
 import { PrivateKey } from './private-key.js';
 import { PublicKey } from './public-key.js';
 
@@ -190,9 +190,9 @@ export interface IKeyPair {
 
   /**
    * Returns the key pair as a MultibaseKey object.
-   * @returns {MultibaseKeyPair} The key pair as a MultibaseKey object.
+   * @returns {MultikeyPair} The key pair as a MultibaseKey object.
    */
-  multibase(): MultibaseKeyPair;
+  multibase(): MultikeyPair;
 }
 
 
@@ -203,28 +203,45 @@ export interface KeyPairParams {
 }
 
 /**
- * Interface for the MultibaseKeyPair class.
+ * Interface for the MultikeyPair class.
  * @export
- * @interface IMultibaseKeyPair
- * @type {IMultibaseKeyPair}
+ * @interface IMultikeyPair
+ * @type {IMultikeyPair}
  */
-export interface IMultibaseKeyPair {
-  publicKey: object;
-  privateKey: object;
+export interface IMultikeyPair {
+  publicKey: PublicKeyObject;
+  privateKey: PrivateKeyObject;
 }
 
-/**
- * Object class representatopm of a MultibaseKeyPair.
- * @export
- * @class MultibaseKeyPair
- * @type {MultibaseKeyPair}
- * @implements {IMultibaseKeyPair}
- */
-export class MultibaseKeyPair implements IMultibaseKeyPair {
-  public publicKey: object;
-  public privateKey: object;
+export type PublicKeyObject = {
+  parity    : number,
+  x         : PublicKeyBytes,
+  y         : PublicKeyBytes,
+  multibase : string,
+  prefix    : PrefixBytes,
+}
 
-  constructor({ publicKey, privateKey }: IMultibaseKeyPair) {
+export type PrivateKeyObject = {
+  bytes: PrivateKeyBytes;
+  secret: PrivateKeySecret;
+  point: PrivateKeyPoint
+  hex: Hex;
+}
+
+// TODO: Update the MultikeyPair to include id and controller
+
+/**
+ * Object class representatopm of a MultikeyPair.
+ * @export
+ * @class MultikeyPair
+ * @type {MultikeyPair}
+ * @implements {IMultikeyPair}
+ */
+export class MultikeyPair implements IMultikeyPair {
+  public publicKey: PublicKeyObject;
+  public privateKey: PrivateKeyObject;
+
+  constructor({ publicKey, privateKey }: IMultikeyPair) {
     this.publicKey = publicKey;
     this.privateKey = privateKey;
   }
