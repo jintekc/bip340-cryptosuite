@@ -186,13 +186,6 @@ export interface IKeyPair {
    * @throws {KeyPairError} If the private key is not available
    */
   readonly privateKey?: PrivateKey;
-
-
-  /**
-   * Returns the key pair as a MultibaseKey object.
-   * @returns {MultikeyPair} The key pair as a MultibaseKey object.
-   */
-  multibase(): MultikeyPair;
 }
 
 

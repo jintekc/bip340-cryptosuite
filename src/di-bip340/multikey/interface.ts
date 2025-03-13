@@ -1,9 +1,16 @@
+import { KeyPair, KeyPairJSON, PrivateKey, PublicKey } from '@did-btc1/bip340-key-pair';
 import { DidVerificationMethod } from '@web5/dids';
-import { KeyPair } from '../../keys/key-pair.js';
-import { PrivateKey } from '../../keys/private-key.js';
-import { PublicKey } from '../../keys/public-key.js';
 import { MessageBytes, PrivateKeyBytes, PublicKeyBytes, SignatureBytes } from '../../types/shared.js';
 import { Multikey } from './index.js';
+
+export type MultikeyJSON = {
+  id: string;
+  controller: string;
+  fullId: string;
+  isSigner: boolean;
+  keyPair: KeyPairJSON;
+  verificationMethod: DidVerificationMethod;
+}
 export interface DidParams {
   id: string;
   controller: string;
@@ -80,4 +87,10 @@ export interface IMultikey {
    * if the publicKeyMultibase has an invalid prefix.
    */
   fromVerificationMethod(verificationMethod: DidVerificationMethod): Multikey;
+
+  /**
+   * Convert the multikey to a JSON object.
+   * @returns {MultikeyJSON} The multikey as a JSON object.
+   */
+  json(): MultikeyJSON;
 }

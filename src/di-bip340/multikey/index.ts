@@ -1,12 +1,10 @@
+import { KeyPair, PrivateKey, PublicKey } from '@did-btc1/bip340-key-pair';
 import { schnorr } from '@noble/curves/secp256k1';
 import { DidVerificationMethod } from '@web5/dids';
 import { randomBytes } from 'crypto';
-import { KeyPair } from '../../keys/key-pair.js';
-import { PrivateKey } from '../../keys/private-key.js';
-import { PublicKey } from '../../keys/public-key.js';
 import { Hex, SignatureBytes } from '../../types/shared.js';
 import { MultikeyError } from '../../utils/error.js';
-import { FromPrivateKey, FromPublicKey, IMultikey, MultikeyParams } from './interface.js';
+import { FromPrivateKey, FromPublicKey, IMultikey, MultikeyJSON, MultikeyParams } from './interface.js';
 
 /**
  * Implements {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1/#multikey | 2.1.1 Multikey}
@@ -145,7 +143,7 @@ export class Multikey implements IMultikey {
     }
 
     // Decode the public key multibase
-    const multibase = this.publicKey.decodeMultibase();
+    const multibase = this.publicKey.decode();
 
     // Get the 32 byte public key from the multibase
     const publicKey = multibase.slice(2, multibase.length);
@@ -163,7 +161,17 @@ export class Multikey implements IMultikey {
     return !!this.keyPair.privateKey;
   }
 
-  // TODO: Implement a json method that calls the PrivateKey and PublicKey json methods
+  /** @see IMultikey.json */
+  public json(): MultikeyJSON {
+    return {
+      id                 : this.id,
+      controller         : this.controller,
+      fullId             : this.fullId(),
+      isSigner           : this.isSigner,
+      keyPair            : this.keyPair.json(),
+      verificationMethod : this.toVerificationMethod()
+    };
+  }
 }
 
 /**

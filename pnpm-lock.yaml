@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@did-btc1/bip340-key-pair':
+        specifier: ^0.4.0
+        version: 0.4.0
       '@noble/curves':
         specifier: ^1.8.1
         version: 1.8.1
@@ -108,6 +111,10 @@ packages:
 
   '@decentralized-identity/ion-sdk@1.0.4':
     resolution: {integrity: sha512-pOWrlTH5ChxUKRHOgfG2ZeTioWEFJXADyErCQOJ0BqYNDKfP+CM09Vss+9ei6PNOABQlcDn0mEDFZtpO+DXl8A==}
+
+  '@did-btc1/bip340-key-pair@0.4.0':
+    resolution: {integrity: sha512-XXIddRjobSa8+II4RhK3Py/apP3mOkMjVHMW+vXNhDQx8zu5o5jHSc8A3eY8+1sVjFJgiscwXYn9sAgx/WM4JQ==}
+    engines: {node: '>=22.0.0'}
 
   '@digitalbazaar/http-client@3.4.1':
     resolution: {integrity: sha512-Ahk1N+s7urkgj7WvvUND5f8GiWEPfUw0D41hdElaqLgu8wZScI8gdI0q+qWw5N1d35x7GCRH2uk9mi+Uzo9M3g==}
@@ -1832,6 +1839,12 @@ snapshots:
       canonicalize: 2.0.0
       multiformats: 12.1.3
       uri-js: 4.4.1
+
+  '@did-btc1/bip340-key-pair@0.4.0':
+    dependencies:
+      '@noble/hashes': 1.7.1
+      multiformats: 13.3.2
+      tiny-secp256k1: 2.2.3
 
   '@digitalbazaar/http-client@3.4.1(web-streams-polyfill@3.3.3)':
     dependencies:
