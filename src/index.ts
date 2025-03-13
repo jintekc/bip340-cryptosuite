@@ -1,4 +1,4 @@
-/** {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity Bip340 Cryptosuite} */
+/** {@link https://dcdpr.github.io/data-integrity-schnorr-secp256k1 | Data Integrity BIP340 Cryptosuites v0.1} */
 
 export * from './di-bip340/cryptosuite/canonicalize.js';
 export * from './di-bip340/cryptosuite/index.js';

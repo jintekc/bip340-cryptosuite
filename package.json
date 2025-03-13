@@ -1,6 +1,6 @@
 {
   "name": "@did-btc1/bip340-cryptosuite",
-  "version": "2.3.3",
+  "version": "2.4.0",
   "type": "module",
   "description": "TypeScript/JavaScript reference implementation of the Data Integrity BIP340 Cryptosuite v0.1 specification",
   "main": "./dist/cjs/index.js",
@@ -77,6 +77,7 @@
     "data integrity bip340 cryptosuite"
   ],
   "dependencies": {
+    "@did-btc1/bip340-key-pair": "^0.4.0",
     "@noble/curves": "^1.8.1",
     "@noble/hashes": "^1.7.1",
     "@sphereon/ssi-types": "^0.32.0",
